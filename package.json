@@ -1,0 +1,19 @@
+{
+  "name": "vitae-health-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vitae Health Tracker — desktop installers via Tauri",
+  "scripts": {
+    "prepare-dist": "node scripts/prepare-dist.mjs",
+    "serve-dist": "python3 -m http.server 1420 --directory dist",
+    "icons": "node scripts/generate-icon.mjs && npx tauri icon app-icon.png",
+    "tauri": "tauri",
+    "dev:app": "tauri dev",
+    "build:app": "tauri build",
+    "build:mac": "tauri build --bundles dmg",
+    "build:linux": "tauri build --bundles deb"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.6.2"
+  }
+}

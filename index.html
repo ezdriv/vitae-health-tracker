@@ -1,0 +1,3874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vitae · BMI & Lifespan Health Tracker</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#14b8a6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Vitae">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0c1419;
+      --bg-card: #141e26;
+      --bg-elevated: #1a2832;
+      --bg-input: #0f1a22;
+      --text-primary: #e8f0f4;
+      --text-secondary: #8ba3b0;
+      --text-muted: #5a7280;
+      --accent-teal: #2dd4bf;
+      --accent-teal-dim: #14b8a6;
+      --accent-coral: #f97066;
+      --accent-amber: #fbbf24;
+      --accent-sage: #86efac;
+      --accent-sky: #38bdf8;
+      --border: rgba(45, 212, 191, 0.12);
+      --border-strong: rgba(45, 212, 191, 0.28);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --radius: 14px;
+      --radius-sm: 8px;
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Outfit', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(45, 212, 191, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 100%, rgba(249, 112, 102, 0.06) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo-block h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .logo-block h1 em {
+      font-style: italic;
+      color: var(--accent-teal);
+    }
+
+    .logo-block p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-top: 0.35rem;
+      font-weight: 300;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.55rem 1.1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      border-color: var(--border-strong);
+      background: #223340;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-teal-dim), var(--accent-teal));
+      border-color: transparent;
+      color: var(--bg-deep);
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.08);
+      background: linear-gradient(135deg, var(--accent-teal-dim), var(--accent-teal));
+    }
+
+    .btn-danger {
+      border-color: rgba(249, 112, 102, 0.3);
+      color: var(--accent-coral);
+    }
+
+    .btn-danger:hover {
+      background: rgba(249, 112, 102, 0.1);
+    }
+
+    /* Layout grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title .icon {
+      font-size: 1.1rem;
+      opacity: 0.7;
+    }
+
+    /* Calendar */
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .calendar-month {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+    }
+
+    .cal-nav {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .cal-nav button {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.15s;
+    }
+
+    .cal-nav button:hover {
+      border-color: var(--accent-teal);
+      color: var(--accent-teal);
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .calendar-weekdays span {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: var(--bg-input);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      position: relative;
+      min-height: 42px;
+    }
+
+    .cal-day:hover:not(.empty):not(.future) {
+      border-color: var(--border-strong);
+      background: var(--bg-elevated);
+    }
+
+    .cal-day.empty { cursor: default; background: transparent; }
+    .cal-day.future { opacity: 0.3; cursor: not-allowed; }
+
+    .cal-day.today {
+      border-color: var(--accent-teal);
+      box-shadow: 0 0 0 1px var(--accent-teal);
+    }
+
+    .cal-day.selected {
+      background: rgba(45, 212, 191, 0.15);
+      border-color: var(--accent-teal);
+      color: var(--accent-teal);
+    }
+
+    .cal-day.has-entry::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent-coral);
+    }
+
+    .cal-day.selected.has-entry::after {
+      background: var(--accent-teal);
+    }
+
+    /* Entry form */
+    .selected-date-banner {
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.1), rgba(56, 189, 248, 0.06));
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .selected-date-banner strong {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 500px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: border-color 0.15s;
+    }
+
+    .field input:focus, .field select:focus {
+      outline: none;
+      border-color: var(--accent-teal);
+    }
+
+    .unit-toggle {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .unit-toggle button {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .unit-toggle button.active {
+      background: rgba(45, 212, 191, 0.15);
+      color: var(--accent-teal);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+    }
+
+    .form-actions .btn { flex: 1; justify-content: center; }
+
+    /* BMI Result */
+    .bmi-result {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      text-align: center;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.35s ease;
+    }
+
+    .bmi-result.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bmi-value {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .bmi-category {
+      display: inline-block;
+      padding: 0.3rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 0.5rem;
+    }
+
+    .cat-underweight { background: rgba(56, 189, 248, 0.2); color: var(--accent-sky); }
+    .cat-normal { background: rgba(134, 239, 172, 0.2); color: var(--accent-sage); }
+    .cat-overweight { background: rgba(251, 191, 36, 0.2); color: var(--accent-amber); }
+    .cat-obese { background: rgba(249, 112, 102, 0.2); color: var(--accent-coral); }
+
+    .bmi-formula-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+    }
+
+    /* BMI gauge */
+    .bmi-gauge {
+      margin-top: 1rem;
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(90deg,
+        var(--accent-sky) 0%, var(--accent-sky) 18.5%,
+        var(--accent-sage) 18.5%, var(--accent-sage) 50%,
+        var(--accent-amber) 50%, var(--accent-amber) 75%,
+        var(--accent-coral) 75%, var(--accent-coral) 100%
+      );
+      position: relative;
+    }
+
+    .bmi-gauge-marker {
+      position: absolute;
+      top: -4px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border: 2px solid var(--bg-deep);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .gauge-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Sidebar panels */
+    .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* History table */
+    .history-list {
+      max-height: 280px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .history-item:hover { background: rgba(45, 212, 191, 0.04); }
+    .history-item:last-child { border-bottom: none; }
+
+    .history-date {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .history-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .history-bmi {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      text-align: right;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Lifespan panel */
+    .lifespan-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .lifespan-tabs button {
+      flex: 1;
+      padding: 0.45rem 0.3rem;
+      border: none;
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lifespan-tabs button.active {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--accent-teal);
+    }
+
+    .lifespan-stat {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .stat-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--accent-teal);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 0.2rem;
+    }
+
+    .lifespan-note {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .lifespan-note a {
+      color: var(--accent-teal);
+      text-decoration: none;
+    }
+
+    .lifespan-note a:hover { text-decoration: underline; }
+
+    /* Modal / Help */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      max-width: 680px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 2rem;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+      transform: translateY(20px);
+      transition: transform 0.25s;
+    }
+
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal h2 {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      margin: 1.5rem 0 0.6rem;
+      color: var(--accent-teal);
+    }
+
+    .modal p, .modal li {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .modal ul { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+
+    .modal .source-link {
+      display: block;
+      padding: 0.6rem 0.85rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--accent-teal);
+      text-decoration: none;
+      font-size: 0.82rem;
+      margin: 0.4rem 0;
+      transition: border-color 0.15s;
+    }
+
+    .modal .source-link:hover { border-color: var(--accent-teal); }
+
+    .modal-close {
+      float: right;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--text-primary); }
+
+    /* Exit modal */
+    .exit-prompt {
+      text-align: center;
+    }
+
+    .exit-prompt p {
+      margin-bottom: 1.25rem;
+    }
+
+    .exit-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1.25rem;
+      font-size: 0.85rem;
+      z-index: 200;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card { animation: fadeUp 0.5s ease backwards; }
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.12s; }
+    .sidebar .card:nth-child(1) { animation-delay: 0.08s; }
+    .sidebar .card:nth-child(2) { animation-delay: 0.15s; }
+    .sidebar .card:nth-child(3) { animation-delay: 0.22s; }
+
+    /* Storage indicator */
+    .storage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      padding: 0.3rem 0.6rem;
+      background: var(--bg-input);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .storage-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-sage);
+    }
+
+    .imperial-height {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    /* Main navigation tabs */
+    .main-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .main-nav button {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .main-nav button:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .main-nav button.active {
+      background: rgba(45, 212, 191, 0.12);
+      border-color: var(--accent-teal);
+      color: var(--accent-teal);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Notes field */
+    .notes-field textarea {
+      width: 100%;
+      min-height: 88px;
+      padding: 0.75rem 0.85rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      resize: vertical;
+      transition: border-color 0.15s;
+    }
+
+    .notes-field textarea:focus {
+      outline: none;
+      border-color: var(--accent-teal);
+    }
+
+    .notes-field textarea::placeholder { color: var(--text-muted); }
+
+    .notes-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Charts */
+    .chart-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .chart-type-tabs {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .chart-type-tabs button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chart-type-tabs button.active {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--accent-teal);
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      font-size: 0.72rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .chart-container canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .chart-empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .chart-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .chart-metric {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .chart-metric-val {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--accent-teal);
+    }
+
+    .chart-metric-lbl {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Bulk entry spreadsheet */
+    .bulk-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .bulk-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+    }
+
+    .bulk-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto;
+      min-width: 720px;
+    }
+
+    .bulk-table th {
+      background: var(--bg-elevated);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 0.65rem 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .bulk-table td {
+      padding: 0.35rem 0.4rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .bulk-table tr:last-child td { border-bottom: none; }
+    .bulk-table tr:hover td { background: rgba(45, 212, 191, 0.03); }
+
+    .bulk-table input, .bulk-table select {
+      width: 100%;
+      min-width: 0;
+      padding: 0.45rem 0.4rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+    }
+
+    .bulk-table input:focus, .bulk-table select:focus {
+      outline: none;
+      border-color: var(--accent-teal);
+    }
+
+    .bulk-table .col-date select { min-width: 58px; }
+    .bulk-table .col-month select { min-width: 90px; }
+    .bulk-table .col-year select { min-width: 68px; }
+    .bulk-table .col-weight input { min-width: 70px; }
+    .bulk-table .col-height input { min-width: 70px; }
+    .bulk-table .col-bmi { min-width: 52px; text-align: center; font-weight: 600; font-size: 0.85rem; }
+    .bulk-table .col-notes input { min-width: 160px; }
+
+    .bulk-bmi-under { color: var(--accent-sky); }
+    .bulk-bmi-normal { color: var(--accent-sage); }
+    .bulk-bmi-over { color: var(--accent-amber); }
+    .bulk-bmi-obese { color: var(--accent-coral); }
+
+    .bulk-row-del {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.25rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .bulk-row-del:hover { color: var(--accent-coral); background: rgba(249,112,102,0.1); }
+
+    .bulk-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .hidden-input { display: none; }
+
+    .persistence-card {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .persistence-card strong { color: var(--accent-teal); }
+
+    .persistence-card ol {
+      margin: 0.5rem 0 0 1.1rem;
+    }
+
+    .persistence-card li { margin-bottom: 0.3rem; }
+
+    .header-unit { min-width: 140px; }
+    .header-unit button { font-size: 0.72rem; padding: 0.45rem 0.5rem; }
+
+    .save-status {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .save-status.saved { color: var(--accent-sage); }
+
+    .category-detail {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .bulk-height-imperial {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+
+    .bulk-height-imperial input { min-width: 36px !important; }
+
+    .life-stage-badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--accent-teal);
+      border: 1px solid var(--border-strong);
+      margin-left: 0.5rem;
+    }
+
+    .life-stage-badge.infant { background: rgba(56, 189, 248, 0.12); color: var(--accent-sky); }
+    .life-stage-badge.child, .life-stage-badge.adolescent { background: rgba(134, 239, 172, 0.12); color: var(--accent-sage); }
+    .life-stage-badge.mature { background: rgba(251, 191, 36, 0.12); color: var(--accent-amber); }
+
+    .profile-warning {
+      font-size: 0.75rem;
+      color: var(--accent-amber);
+      margin-top: 0.5rem;
+      padding: 0.5rem 0.65rem;
+      background: rgba(251, 191, 36, 0.08);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    #profileLifeStage {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 0.65rem;
+      line-height: 1.5;
+    }
+
+    #bmiCategoriesPanel { line-height: 1.8; font-size: 0.82rem; color: var(--text-secondary); }
+
+    .unit-pref-badge {
+      font-size: 0.68rem;
+      color: var(--accent-teal);
+      display: block;
+      margin-top: 1px;
+    }
+
+    /* Insights & Goals */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .insight-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .insight-val {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      color: var(--accent-teal);
+      line-height: 1.2;
+    }
+
+    .insight-val.positive { color: var(--accent-coral); }
+    .insight-val.negative { color: var(--accent-sage); }
+
+    .insight-lbl {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 0.25rem;
+    }
+
+    .goal-progress-wrap {
+      margin: 1.25rem 0;
+    }
+
+    .goal-progress-bar {
+      height: 10px;
+      background: var(--bg-input);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .goal-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-teal-dim), var(--accent-teal));
+      border-radius: 5px;
+      transition: width 0.5s ease;
+      min-width: 0;
+    }
+
+    .goal-progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    .goal-distance {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 0.65rem;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .insights-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .insights-two-col { grid-template-columns: 1fr; }
+    }
+
+    .backup-status {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      padding: 0.75rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-top: 1rem;
+      line-height: 1.55;
+    }
+
+    .backup-status.warn {
+      border-color: rgba(251, 191, 36, 0.35);
+      background: rgba(251, 191, 36, 0.06);
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 0.75rem;
+    }
+
+    .checkbox-row input { accent-color: var(--accent-teal); }
+
+    /* Doctor report */
+    .report-doc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .report-doc h3 {
+      font-family: var(--font-display);
+      color: var(--accent-teal);
+      font-size: 1.1rem;
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .report-doc h3:first-child { margin-top: 0; }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 0.5rem;
+    }
+
+    .report-table th, .report-table td {
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.5rem;
+      text-align: left;
+    }
+
+    .report-table th {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+    }
+
+    .report-actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-top: 1.25rem;
+    }
+
+    #doctorReportContent { max-height: 55vh; overflow-y: auto; }
+
+    @media print {
+      body::before, .app > header, .main-nav, .header-actions, .modal-close,
+      .report-actions, .toast, .modal-overlay:not(.printing) { display: none !important; }
+      body { background: white; color: #111; }
+      .modal-overlay.printing {
+        position: static; background: none; padding: 0; opacity: 1; pointer-events: all;
+      }
+      .modal-overlay.printing .modal {
+        box-shadow: none; border: none; max-height: none; padding: 0; transform: none;
+        background: white; color: #111; max-width: 100%;
+      }
+      .report-doc, .report-doc h3 { color: #111; }
+      .report-table th { background: #f0f0f0; color: #333; }
+      .report-table th, .report-table td { border-color: #ccc; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo-block">
+        <h1>Vitae <em>Health</em> Tracker</h1>
+        <p>BMI monitoring with dated records · Lifespan reference data</p>
+      </div>
+      <div class="header-actions">
+        <div class="unit-toggle header-unit" id="globalUnitToggle">
+          <button class="active" data-unit="metric">kg / cm</button>
+          <button data-unit="imperial">lb / ft·in</button>
+        </div>
+        <span class="storage-badge" id="storageBadge">
+          <span class="storage-dot" id="storageDot"></span>
+          <span>
+            <span id="entryCount">0 entries saved</span>
+            <span class="save-status" id="saveStatus">Loading…</span>
+            <span class="unit-pref-badge" id="unitPrefBadge"></span>
+          </span>
+        </span>
+        <button class="btn" id="btnDoctorReport" title="Doctor visit report">🩺 Report</button>
+        <button class="btn" id="btnExport" title="Download CSV file">⬇ Export CSV</button>
+        <button class="btn" id="btnImport" title="Load data from CSV file">⬆ Import CSV</button>
+        <button class="btn" id="btnInstall" style="display:none;" title="Install as app">⊕ Install</button>
+        <input type="file" id="csvFileInput" class="hidden-input" accept=".csv,text/csv">
+        <a class="btn" href="downloads.html" title="Download Mac/Linux installers">⬇ Downloads</a>
+        <button class="btn" id="btnHelp">? Help & Sources</button>
+        <button class="btn btn-danger" id="btnExit">Exit</button>
+      </div>
+    </header>
+
+    <nav class="main-nav" id="mainNav">
+      <button class="active" data-tab="calendar">📅 Calendar Entry</button>
+      <button data-tab="graphs">📈 Trends & Graphs</button>
+      <button data-tab="bulk">📑 Bulk Entry</button>
+      <button data-tab="insights">🎯 Insights & Goals</button>
+    </nav>
+
+    <!-- CALENDAR TAB -->
+    <div class="tab-panel active" id="tab-calendar">
+    <div class="main-grid">
+      <div class="main-content">
+        <div class="card">
+          <div class="card-title"><span class="icon">📅</span> Calendar Entry</div>
+
+          <div class="calendar-header">
+            <button class="btn" id="btnToday" style="font-size:0.75rem;padding:0.35rem 0.7rem;">Today</button>
+            <span class="calendar-month" id="calMonthLabel"></span>
+            <div class="cal-nav">
+              <button id="calPrev" aria-label="Previous month">‹</button>
+              <button id="calNext" aria-label="Next month">›</button>
+            </div>
+          </div>
+
+          <div class="calendar-weekdays">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span>
+            <span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+
+        <div class="card" style="margin-top:1.5rem;">
+          <div class="card-title"><span class="icon">⚖</span> Body Metrics</div>
+
+          <div class="selected-date-banner">
+            <span>Recording for <strong id="selectedDateDisplay"></strong>
+              <span class="life-stage-badge" id="entryLifeStage" style="display:none;"></span>
+            </span>
+            <span style="font-size:0.75rem;color:var(--text-muted);" id="existingEntryHint"></span>
+          </div>
+          <div class="profile-warning" id="profileWarning" style="display:none;">
+            Set your <strong>birth date</strong> and <strong>sex</strong> in the Profile panel (sidebar) to apply the correct age-based BMI scale.
+          </div>
+
+          <div class="unit-toggle" id="unitToggle">
+            <button class="active" data-unit="metric">Metric (kg / cm)</button>
+            <button data-unit="imperial">Imperial (lb / ft·in)</button>
+          </div>
+
+          <div class="form-row">
+            <div class="field" id="weightField">
+              <label for="weight">Weight (kg)</label>
+              <input type="number" id="weight" step="0.1" min="1" max="500" placeholder="e.g. 72.5">
+            </div>
+            <div class="field" id="heightField">
+              <label for="height">Height (cm)</label>
+              <input type="number" id="height" step="0.1" min="30" max="300" placeholder="e.g. 175">
+            </div>
+          </div>
+
+          <div class="field notes-field" style="margin-bottom:1rem;">
+            <label for="entryNotes">Journal — Mood, Activities & Contributing Factors</label>
+            <textarea id="entryNotes" placeholder="Log mood, exercise, diet changes, sleep, stress, medications, or anything that may explain weight gains or losses…"></textarea>
+            <p class="notes-hint">Saved with this date's entry. Visible in bulk entry and CSV export.</p>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-primary" id="btnCalculate">Calculate & Save</button>
+            <button class="btn btn-danger" id="btnDelete" style="display:none;">Delete Entry</button>
+          </div>
+
+          <div class="bmi-result" id="bmiResult">
+            <div class="bmi-value" id="bmiValue">—</div>
+            <div>Body Mass Index</div>
+            <span class="bmi-category" id="bmiCategory"></span>
+            <div class="category-detail" id="bmiCategoryDetail"></div>
+            <div class="bmi-gauge">
+              <div class="bmi-gauge-marker" id="bmiMarker" style="left:50%"></div>
+            </div>
+            <div class="gauge-labels">
+              <span>16</span><span>18.5</span><span>25</span><span>30</span><span>40</span>
+            </div>
+            <p class="bmi-formula-note">
+              BMI = weight (kg) ÷ height (m)² · Categories per
+              <a href="https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight" target="_blank" rel="noopener" style="color:var(--accent-teal)">WHO (2024)</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="card">
+          <div class="card-title"><span class="icon">👤</span> Your Profile</div>
+          <div class="form-row">
+            <div class="field">
+              <label for="profileBirthDate">Birth Date</label>
+              <input type="date" id="profileBirthDate" max="">
+            </div>
+            <div class="field">
+              <label for="profileSex">Sex at Birth</label>
+              <select id="profileSex">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
+          <p id="profileLifeStage">Enter birth date to determine life stage and BMI reference scale.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">📋</span> Recent Entries</div>
+          <div class="history-list" id="historyList">
+            <div class="empty-state">No entries yet. Select a date and record your metrics.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">🌐</span> Lifespan Reference</div>
+          <div class="lifespan-tabs" id="lifespanTabs">
+            <button class="active" data-group="male">Male</button>
+            <button data-group="female">Female</button>
+            <button data-group="infant">Infant</button>
+            <button data-group="elderly">Elderly</button>
+          </div>
+          <div class="lifespan-stat" id="lifespanStats"></div>
+          <p class="lifespan-note" id="lifespanNote"></p>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">📊</span> BMI Categories <span id="categoriesStageLabel" style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-body);"></span></div>
+          <div id="bmiCategoriesPanel"></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- GRAPHS TAB -->
+    <div class="tab-panel" id="tab-graphs">
+      <div class="card">
+        <div class="card-title"><span class="icon">📈</span> BMI Trends & Zone Visualization</div>
+        <div class="chart-toolbar">
+          <div class="chart-type-tabs" id="chartTypeTabs">
+            <button class="active" data-chart="line">Line</button>
+            <button data-chart="bar">Bar</button>
+            <button data-chart="ribbon">3D Ribbon</button>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--accent-sky)"></span>Under (&lt;18.5)</span>
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--accent-sage)"></span>Normal</span>
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--accent-amber)"></span>Overweight</span>
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--accent-coral)"></span>Obese (≥30)</span>
+          </div>
+        </div>
+        <div class="chart-container" id="chartContainer">
+          <canvas id="bmiChart" width="1100" height="420"></canvas>
+          <div class="chart-empty" id="chartEmpty" style="display:none;">Add entries via Calendar or Bulk Entry to see your BMI trends.</div>
+        </div>
+        <div class="chart-metrics" id="chartMetrics"></div>
+      </div>
+    </div>
+
+    <!-- BULK ENTRY TAB -->
+    <div class="tab-panel" id="tab-bulk">
+      <div class="card">
+        <div class="card-title"><span class="icon">📑</span> Mass Data Entry</div>
+        <div class="bulk-toolbar">
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            <span style="font-size:0.82rem;color:var(--text-secondary);">Spreadsheet entry — day, month & year</span>
+            <div class="unit-toggle" id="bulkUnitToggle" style="width:auto;">
+              <button class="active" data-unit="metric">kg / cm</button>
+              <button data-unit="imperial">lb / ft·in</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <button class="btn" id="btnAddBulkRow">+ Add Row</button>
+            <button class="btn btn-primary" id="btnSaveBulk">Save All Rows</button>
+          </div>
+        </div>
+        <div class="bulk-table-wrap">
+          <table class="bulk-table" id="bulkTable">
+            <thead>
+              <tr>
+                <th class="col-month">Month</th>
+                <th class="col-date">Day</th>
+                <th class="col-year">Year</th>
+                <th class="col-weight" id="bulkWeightHeader">Wt (kg)</th>
+                <th class="col-height" id="bulkHeightHeader">Ht (cm)</th>
+                <th class="col-bmi">BMI</th>
+                <th class="col-notes">Notes / Journal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="bulkTableBody"></tbody>
+          </table>
+        </div>
+        <p class="bulk-hint">Table auto-adjusts to content. BMI calculates automatically. Day dropdown updates for the selected month/year. Duplicate dates overwrite on save.</p>
+      </div>
+
+      <div class="persistence-card">
+        <strong>Data Persistence Guide</strong>
+        <ol>
+          <li><strong>Auto-save:</strong> Saved entries write to localStorage + IndexedDB instantly — survives tab close and browser crash.</li>
+          <li><strong>Draft auto-save:</strong> Unsaved form input is draft-saved every few seconds while you type.</li>
+          <li><strong>Export (offload):</strong> Click <em>Export CSV</em> to download <code>vitae-bmi-health-log.csv</code>.</li>
+          <li><strong>Import (reload):</strong> Click <em>Import CSV</em> to restore a previously exported file.</li>
+          <li><strong>Between devices:</strong> Export → transfer file → Import on another machine.</li>
+          <li><strong>Backup tip:</strong> Export weekly. Clearing browser data erases local storage.</li>
+          <li><strong>How to run:</strong> Double-click <code>index.html</code> or run <code>open index.html</code> in Terminal — no server needed.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- INSIGHTS & GOALS TAB -->
+    <div class="tab-panel" id="tab-insights">
+      <div class="insights-two-col">
+        <div class="card">
+          <div class="card-title"><span class="icon">🎯</span> Your Goals</div>
+          <div class="unit-toggle" id="goalTypeToggle" style="margin-bottom:1rem;">
+            <button class="active" data-goal="weight">Target Weight</button>
+            <button data-goal="bmi">Target BMI</button>
+          </div>
+          <div class="form-row">
+            <div class="field" id="goalWeightField">
+              <label for="goalTargetWeight" id="goalWeightLabel">Target Weight (kg)</label>
+              <input type="number" id="goalTargetWeight" step="0.1" min="1" placeholder="e.g. 70">
+            </div>
+            <div class="field" id="goalBmiField" style="display:none;">
+              <label for="goalTargetBmi">Target BMI</label>
+              <input type="number" id="goalTargetBmi" step="0.1" min="10" max="60" placeholder="e.g. 22.5">
+            </div>
+            <div class="field">
+              <label for="goalTargetDate">Target Date (optional)</label>
+              <input type="date" id="goalTargetDate">
+            </div>
+          </div>
+          <p class="notes-hint" id="goalUnitHint">Goal weight follows your saved unit preference (header toggle).</p>
+          <button class="btn btn-primary" id="btnSaveGoals" style="width:100%;justify-content:center;">Save Goals</button>
+          <div class="goal-progress-wrap" id="goalProgressSection" style="display:none;">
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.4rem;">Progress toward goal</div>
+            <div class="goal-progress-bar"><div class="goal-progress-fill" id="goalProgressFill" style="width:0%"></div></div>
+            <div class="goal-progress-labels">
+              <span id="goalProgressStart">Start</span>
+              <span id="goalProgressPct">0%</span>
+              <span id="goalProgressTarget">Goal</span>
+            </div>
+            <div class="goal-distance" id="goalDistanceText"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">📈</span> Trend Insights</div>
+          <div class="insights-grid" id="insightsGrid">
+            <div class="empty-state" style="grid-column:1/-1;">Add entries to see trend insights.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-title"><span class="icon">🩺</span> Doctor Visit Report</div>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">
+          Generate a one-page clinical summary with profile, goals, trends, recent entries, and journal notes — ready to print or save.
+        </p>
+        <div class="report-actions">
+          <button class="btn btn-primary" id="btnPreviewReport">Preview Report</button>
+          <button class="btn" id="btnPrintReport">Print Report</button>
+          <button class="btn" id="btnDownloadReport">Download HTML Report</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-title"><span class="icon">💾</span> Backup & Install</div>
+        <div class="backup-status" id="backupStatus">Checking backup status…</div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="weeklyBackupReminder" checked>
+          Remind me to export CSV weekly (recommended)
+        </label>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;line-height:1.5;">
+          <strong>Desktop app (Mac/Linux):</strong> Run <code style="color:var(--accent-teal)">./build-mac.sh</code> or <code style="color:var(--accent-teal)">./build-linux.sh</code> for a native <code>.dmg</code> or <code>.deb</code> installer (no Chrome required).<br>
+          <strong>Browser PWA (Chrome/Edge):</strong> Run <code style="color:var(--accent-teal)">python3 -m http.server 8080</code>, open localhost:8080, then Install.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Weekly Backup Modal -->
+  <div class="modal-overlay" id="backupModal">
+    <div class="modal exit-prompt" style="max-width:440px;">
+      <h2>Weekly Backup Reminder</h2>
+      <p>It's been over 7 days since your last CSV export. Export now to keep an off-device backup of your health data?</p>
+      <div class="exit-actions">
+        <button class="btn" id="backupSkip">Remind Later</button>
+        <button class="btn btn-primary" id="backupExport">Export CSV Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Doctor Report Modal -->
+  <div class="modal-overlay" id="doctorReportModal">
+    <div class="modal" style="max-width:800px;">
+      <button class="modal-close" id="doctorReportClose">&times;</button>
+      <h2>Doctor Visit Report</h2>
+      <div id="doctorReportContent" class="report-doc"></div>
+      <div class="report-actions">
+        <button class="btn btn-primary" id="btnPrintReportModal">Print</button>
+        <button class="btn" id="btnDownloadReportModal">Download HTML</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal">
+      <button class="modal-close" id="helpClose">&times;</button>
+      <h2>Help & Source References</h2>
+
+      <h3>BMI Calculation</h3>
+      <p>Body Mass Index is calculated as:</p>
+      <p style="font-family:var(--font-display);font-size:1.2rem;color:var(--text-primary);margin:0.5rem 0;">
+        BMI = weight (kg) ÷ [height (m)]²
+      </p>
+      <p>Imperial conversions use NIST standard factors: 1 lb = 0.45359237 kg, 1 in = 2.54 cm (exact). All BMI values are computed in metric before categorization.</p>
+
+      <h3>WHO / CDC BMI Categories (Adults ≥20)</h3>
+      <ul>
+        <li><strong>Underweight:</strong> BMI &lt; 18.5</li>
+        <li><strong>Healthy Weight:</strong> BMI 18.5 – 24.9</li>
+        <li><strong>Overweight:</strong> BMI 25.0 – 29.9</li>
+        <li><strong>Obesity Class I:</strong> BMI 30.0 – 34.9</li>
+        <li><strong>Obesity Class II:</strong> BMI 35.0 – 39.9</li>
+        <li><strong>Obesity Class III (Severe):</strong> BMI ≥ 40.0</li>
+      </ul>
+
+      <h3>Primary Sources</h3>
+      <a class="source-link" href="https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight" target="_blank" rel="noopener">
+        WHO — Obesity and Overweight Fact Sheet (2024)
+      </a>
+      <a class="source-link" href="https://www.cdc.gov/bmi/adult-calculator/bmi-categories.html" target="_blank" rel="noopener">
+        CDC — Adult BMI Categories
+      </a>
+      <a class="source-link" href="https://www.cdc.gov/bmi/child-teen-calculator/cdc-bmi-percentile-calculator.html" target="_blank" rel="noopener">
+        CDC — BMI Percentile Calculator for Children & Teens (2–19 yrs)
+      </a>
+
+      <h3>Lifespan & Mortality Data</h3>
+      <p>Life expectancy figures shown are global estimates from the World Health Organization and UN World Population Prospects (2023 revision). Infant mortality rates are per 1,000 live births. Elderly figures show remaining life expectancy at age 65 and 80.</p>
+
+      <a class="source-link" href="https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates" target="_blank" rel="noopener">
+        WHO — Global Health Observatory: Mortality & Life Expectancy
+      </a>
+      <a class="source-link" href="https://population.un.org/wpp/" target="_blank" rel="noopener">
+        UN DESA — World Population Prospects 2024
+      </a>
+      <a class="source-link" href="https://www.cdc.gov/nchs/fastats/life-expectancy.htm" target="_blank" rel="noopener">
+        CDC NCHS — FastStats: Life Expectancy (United States)
+      </a>
+      <a class="source-link" href="https://www.who.int/data/gho/data/indicators/indicator-details/GHO/under-five-mortality-rate-(probability-of-dying-by-age-5-per-1000-live-births)" target="_blank" rel="noopener">
+        WHO — Under-Five Mortality Rate Indicator
+      </a>
+
+      <h3>How to Run</h3>
+      <p>Open <code>index.html</code> in any modern browser — double-click the file, drag it into a browser window, or run <code>open bmi-health-tracker/index.html</code> in Terminal. No installation or server required.</p>
+
+      <h3>Data Storage & Persistence</h3>
+      <p>Saved entries are written to <strong>localStorage</strong> and <strong>IndexedDB</strong> simultaneously. Data persists after closing the tab, quitting the browser, or a browser crash. Draft notes/metrics auto-save while typing. Use <strong>Export CSV</strong> for off-device backup. Use <strong>Import CSV</strong> to restore.</p>
+
+      <h3>Age-Based Life Stages & BMI Scales</h3>
+      <p>Set your <strong>birth date</strong> and <strong>sex</strong> in the Profile panel. The app calculates your age on each entry date and selects the correct reference scale:</p>
+      <ul>
+        <li><strong>Infant (0–23 months):</strong> WHO Child Growth Standards — weight-for-length; BMI percentiles begin at age 2</li>
+        <li><strong>Child (2–12 years):</strong> CDC BMI-for-age sex-specific percentiles</li>
+        <li><strong>Adolescent (13–19 years):</strong> CDC BMI-for-age sex-specific percentiles</li>
+        <li><strong>Adult (20–64 years):</strong> WHO/CDC fixed BMI cutoffs</li>
+        <li><strong>Mature Adult (65+ years):</strong> WHO/CDC adult BMI + geriatric context</li>
+      </ul>
+      <p>Pediatric categories: Underweight (&lt;5th %ile), Healthy (5th–84th), Overweight (85th–94th), Obesity (≥95th). Data from CDC 2000 Growth Charts.</p>
+
+      <h3>CSV File Format</h3>
+      <p>Columns: <code>date, weight_kg, weight_lb, height_cm, height_ft, height_in, bmi, category, life_stage, age_at_entry, bmi_percentile, unit_system, notes, recorded_at</code></p>
+      <p>Import accepts <code>date</code> plus any weight column (<code>weight_kg</code> or <code>weight_lb</code>) and any height columns (<code>height_cm</code> or <code>height_ft</code> + <code>height_in</code>). Empty imperial or metric fields are fine if the other unit is filled in.</p>
+
+      <h3>Tabs</h3>
+      <ul>
+        <li><strong>Calendar Entry:</strong> Single-date entry with calendar picker and journal notes</li>
+        <li><strong>Trends & Graphs:</strong> Line, bar, and 3D ribbon charts with WHO zone colors</li>
+        <li><strong>Bulk Entry:</strong> Spreadsheet for mass data entry with day/month/year selectors</li>
+        <li><strong>Insights & Goals:</strong> Target weight/BMI, trend metrics, doctor report, PWA install, weekly backup</li>
+      </ul>
+
+      <h3>Doctor Report</h3>
+      <p>Click <strong>Report</strong> or use the Insights tab to preview, print, or download an HTML summary for healthcare visits.</p>
+
+      <h3>Install as Desktop App (recommended if you don't use Chrome/Edge)</h3>
+      <p>Native installers use your system's built-in web engine (Safari WebKit on Mac, WebKitGTK on Linux) — not Chrome.</p>
+      <p><a href="downloads.html" style="color:var(--accent-teal);">Download page</a> — Mac <code>.dmg</code> and Linux Mint <code>.deb</code> from GitHub Releases.</p>
+      <ul>
+        <li><strong>Automated builds:</strong> Push tag <code>v1.0.0</code> to GitHub → Actions builds both installers</li>
+        <li><strong>Build locally:</strong> <code>./build-mac.sh</code> or <code>./build-linux.sh</code></li>
+      </ul>
+      <p>Set <code>githubRepo</code> in <code>release-config.json</code> so the download page finds your releases.</p>
+      <h3>Browser Install (PWA — Chrome/Edge only)</h3>
+      <p>Run <code>python3 -m http.server 8080</code>, open localhost:8080, then Install. Works offline after first load.</p>
+
+      <h3>Disclaimer</h3>
+      <p style="font-size:0.8rem;">This tool is for personal health tracking and educational reference only. It does not constitute medical advice. BMI has known limitations (it does not distinguish muscle from fat mass). Consult a healthcare provider for clinical assessment. Pediatric and elderly individuals may require specialized evaluation beyond standard adult BMI categories.</p>
+    </div>
+  </div>
+
+  <!-- Exit Modal -->
+  <div class="modal-overlay" id="exitModal">
+    <div class="modal exit-prompt" style="max-width:420px;">
+      <h2>Leaving Vitae?</h2>
+      <p>Your data is saved locally. Would you like to export your health log as a CSV file before you go?</p>
+      <div class="exit-actions">
+        <button class="btn" id="exitNoExport">Exit Without Export</button>
+        <button class="btn btn-primary" id="exitWithExport">Export CSV & Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="cdc-percentiles.js"></script>
+  <script>
+    const STORAGE_KEY = 'vitae-bmi-health-tracker';
+    const STORAGE_BACKUP_KEY = 'vitae-bmi-health-tracker-backup';
+    const STORAGE_SETTINGS_KEY = 'vitae-bmi-settings';
+    const DRAFTS_KEY = 'vitae-bmi-drafts';
+    const IDB_NAME = 'VitaeHealthDB';
+    const IDB_STORE = 'healthData';
+    const CSV_FILENAME = 'vitae-bmi-health-log.csv';
+    const LAST_EXPORT_KEY = 'vitae-last-export';
+    const BACKUP_REMINDER_KEY = 'vitae-backup-reminder';
+    const BACKUP_SNOOZE_KEY = 'vitae-backup-snooze';
+    const UNIT_PREF_KEY = 'vitae-unit-preference';
+
+    // NIST standard conversion factors (international avoirdupois pound & inch)
+    const CONVERSION = {
+      LB_TO_KG: 0.45359237,
+      KG_TO_LB: 1 / 0.45359237,
+      IN_TO_CM: 2.54,
+      CM_TO_IN: 1 / 2.54
+    };
+
+    const ZONE_COLORS = {
+      underweight: '#38bdf8',
+      normal: '#86efac',
+      overweight: '#fbbf24',
+      obese: '#f97066'
+    };
+
+    const MONTH_NAMES = ['January','February','March','April','May','June',
+      'July','August','September','October','November','December'];
+    const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    // Lifespan reference data — sourced from WHO GHO & UN WPP 2023 (global averages)
+    const LIFESPAN_DATA = {
+      male: {
+        stats: [
+          { value: '71.3', label: 'Life expectancy at birth (yrs)' },
+          { value: '17.5', label: 'Healthy life years (HALE)' },
+          { value: '68.2', label: 'Median survival age' },
+          { value: '54.6', label: 'Years at BMI 18.5–24.9*' }
+        ],
+        note: 'Global male life expectancy at birth: 71.3 years (WHO, 2021). HALE estimates years lived in full health. *BMI in normal range associated with lowest all-cause mortality in meta-analyses (WHO, Lancet 2016).'
+      },
+      female: {
+        stats: [
+          { value: '76.4', label: 'Life expectancy at birth (yrs)' },
+          { value: '19.2', label: 'Healthy life years (HALE)' },
+          { value: '73.1', label: 'Median survival age' },
+          { value: '58.1', label: 'Years at BMI 18.5–24.9*' }
+        ],
+        note: 'Global female life expectancy at birth: 76.4 years (WHO, 2021). Women typically outlive men by ~5 years globally. Source: <a href="https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates" target="_blank" rel="noopener">WHO GHO</a>.'
+      },
+      infant: {
+        stats: [
+          { value: '28.2', label: 'Mortality per 1,000 births' },
+          { value: '37.7', label: 'Under-5 mortality rate' },
+          { value: '99.7%', label: 'Survival to age 1 (global)' },
+          { value: '73.4', label: 'Projected lifespan if born today' }
+        ],
+        note: 'Infant mortality: deaths before age 1 per 1,000 live births (UN IGME, 2023). Under-5 mortality includes neonatal, infant, and child deaths. Pediatric BMI uses CDC/WHO growth charts, not adult categories. <a href="https://www.who.int/data/gho/data/indicators/indicator-details/GHO/under-five-mortality-rate-(probability-of-dying-by-age-5-per-1000-live-births)" target="_blank" rel="noopener">WHO indicator</a>.'
+      },
+      elderly: {
+        stats: [
+          { value: '17.8', label: 'Remaining years at age 65' },
+          { value: '9.4', label: 'Remaining years at age 80' },
+          { value: '22.1%', label: 'Population aged 65+ (global)' },
+          { value: '27.4', label: 'BMI reference upper (65+ yrs)†' }
+        ],
+        note: 'Remaining life expectancy at age 65: 17.8 yrs (male 16.4, female 19.2) per UN WPP 2023. †Some geriatric guidelines suggest BMI 23–27 may be protective in elderly (WHO ageing report). Standard adult categories still apply but clinical context matters. <a href="https://population.un.org/wpp/" target="_blank" rel="noopener">UN WPP</a>.'
+      }
+    };
+
+    // State
+    let entries = {};
+    let drafts = {};
+    let userProfile = { birthDate: null, sex: 'male' };
+    let userGoals = { type: 'weight', targetWeightKg: null, targetBmi: null, targetDate: null };
+    let deferredInstallPrompt = null;
+    let selectedDate = formatDate(new Date());
+    let viewYear = new Date().getFullYear();
+    let viewMonth = new Date().getMonth();
+    let unitSystem = 'metric';
+    let chartType = 'line';
+    let activeTab = 'calendar';
+    let lastSavedAt = null;
+    let draftTimer = null;
+
+    // DOM refs
+    const $ = id => document.getElementById(id);
+
+    function formatDate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function formatDisplayDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+
+    function migrateGoals(goals) {
+      const g = { type: 'weight', targetWeightKg: null, targetBmi: null, targetDate: null, ...(goals || {}) };
+      if (g.targetWeightKg == null && goals?.targetWeight != null) {
+        g.targetWeightKg = goals.targetWeight;
+      }
+      return g;
+    }
+
+    function applyUnitPreference(unit) {
+      if (unit === 'metric' || unit === 'imperial') unitSystem = unit;
+    }
+
+    function loadSettings() {
+      try {
+        const s = JSON.parse(localStorage.getItem(STORAGE_SETTINGS_KEY) || '{}');
+        const unitBackup = localStorage.getItem(UNIT_PREF_KEY);
+        if (s.unitSystem === 'metric' || s.unitSystem === 'imperial') {
+          applyUnitPreference(s.unitSystem);
+        } else {
+          applyUnitPreference(unitBackup);
+        }
+        if (s.birthDate) userProfile.birthDate = s.birthDate;
+        if (s.sex) userProfile.sex = s.sex;
+        if (s.goals) userGoals = migrateGoals(s.goals);
+      } catch { /* defaults */ }
+    }
+
+    function saveSettings() {
+      const payload = getSettingsSnapshot();
+      localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(payload));
+      localStorage.setItem(UNIT_PREF_KEY, unitSystem);
+      updateUnitPrefBadge();
+      saveToIndexedDB(entries);
+    }
+
+    function updateUnitPrefBadge() {
+      const el = $('unitPrefBadge');
+      if (!el) return;
+      el.textContent = unitSystem === 'metric' ? 'Units: kg · cm (saved)' : 'Units: lb · ft/in (saved)';
+    }
+
+    function weightLabel() {
+      return unitSystem === 'metric' ? 'Weight (kg)' : 'Weight (lb)';
+    }
+
+    function heightLabel() {
+      return unitSystem === 'metric' ? 'Height (cm)' : 'Height (ft · in)';
+    }
+
+    function goalWeightLabel() {
+      return unitSystem === 'metric' ? 'Target Weight (kg)' : 'Target Weight (lb)';
+    }
+
+    function displayWeightFromKg(kg) {
+      if (unitSystem === 'metric') return kg.toFixed(1);
+      return kgToLb(kg).toFixed(1);
+    }
+
+    function parseWeightInput(val) {
+      const n = parseFloat(val);
+      if (!n || n <= 0) return null;
+      return unitSystem === 'metric' ? n : lbToKg(n);
+    }
+
+    function loadDrafts() {
+      try {
+        return JSON.parse(localStorage.getItem(DRAFTS_KEY) || '{}');
+      } catch { return {}; }
+    }
+
+    function saveDrafts() {
+      localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+    }
+
+    function openIDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function getSettingsSnapshot() {
+      return {
+        unitSystem,
+        birthDate: userProfile.birthDate,
+        sex: userProfile.sex,
+        goals: { ...userGoals }
+      };
+    }
+
+    function applySettingsSnapshot(s) {
+      if (!s) return;
+      applyUnitPreference(s.unitSystem);
+      if (s.birthDate) userProfile.birthDate = s.birthDate;
+      if (s.sex) userProfile.sex = s.sex;
+      if (s.goals) userGoals = migrateGoals({ ...userGoals, ...s.goals });
+    }
+
+    function mergeSettingsFromPack(idbPack) {
+      if (!idbPack?.settings) return;
+      const localRaw = localStorage.getItem(STORAGE_SETTINGS_KEY);
+      let local = {};
+      try { local = JSON.parse(localRaw || '{}'); } catch { /* ignore */ }
+      const localHasUnit = local.unitSystem === 'metric' || local.unitSystem === 'imperial';
+      const idbHasUnit = idbPack.settings.unitSystem === 'metric' || idbPack.settings.unitSystem === 'imperial';
+
+      if (!localHasUnit && idbHasUnit) {
+        applySettingsSnapshot(idbPack.settings);
+        return;
+      }
+      if (!local.goals && idbPack.settings.goals) {
+        userGoals = migrateGoals(idbPack.settings.goals);
+      } else if (local.goals && idbPack.settings.goals) {
+        const merged = migrateGoals({ ...idbPack.settings.goals, ...local.goals });
+        if (merged.targetWeightKg == null && idbPack.settings.goals.targetWeightKg != null) {
+          merged.targetWeightKg = idbPack.settings.goals.targetWeightKg;
+        }
+        userGoals = merged;
+      }
+    }
+
+    async function saveToIndexedDB(data) {
+      try {
+        const db = await openIDB();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).put({
+            entries: data,
+            settings: getSettingsSnapshot(),
+            savedAt: new Date().toISOString()
+          }, 'main');
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+        db.close();
+      } catch { /* IndexedDB optional fallback */ }
+    }
+
+    async function loadFromIndexedDB() {
+      try {
+        const db = await openIDB();
+        const result = await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const req = tx.objectStore(IDB_STORE).get('main');
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+        db.close();
+        return result || null;
+      } catch { return null; }
+    }
+
+    function loadEntriesSync() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+        const backup = localStorage.getItem(STORAGE_BACKUP_KEY);
+        if (backup) return JSON.parse(backup);
+      } catch { /* fall through */ }
+      return {};
+    }
+
+    async function loadEntriesAsync() {
+      const fromLS = loadEntriesSync();
+      const idbPack = await loadFromIndexedDB();
+      const fromIDB = idbPack?.entries || null;
+      const lsCount = Object.keys(fromLS).length;
+      const idbCount = fromIDB ? Object.keys(fromIDB).length : 0;
+
+      mergeSettingsFromPack(idbPack);
+
+      if (idbCount > lsCount) return { data: fromIDB, source: 'IndexedDB' };
+      if (lsCount > 0) return { data: fromLS, source: 'localStorage' };
+      if (idbCount > 0) return { data: fromIDB, source: 'IndexedDB' };
+      return { data: {}, source: 'none' };
+    }
+
+    function saveEntries() {
+      const payload = JSON.stringify(entries);
+      try {
+        localStorage.setItem(STORAGE_KEY, payload);
+        localStorage.setItem(STORAGE_BACKUP_KEY, payload);
+      } catch (e) {
+        showToast('Warning: localStorage full — export CSV as backup.');
+      }
+      saveToIndexedDB(entries);
+      lastSavedAt = new Date();
+      updateEntryCount();
+      updateSaveStatus();
+    }
+
+    function updateEntryCount() {
+      const count = Object.keys(entries).length;
+      $('entryCount').textContent = `${count} entr${count === 1 ? 'y' : 'ies'} saved`;
+    }
+
+    function updateSaveStatus() {
+      const el = $('saveStatus');
+      const dot = $('storageDot');
+      if (!lastSavedAt) {
+        el.textContent = 'Ready';
+        return;
+      }
+      const t = lastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      el.textContent = `Saved ${t} · localStorage + IndexedDB`;
+      el.classList.add('saved');
+      dot.style.background = 'var(--accent-sage)';
+    }
+
+    function scheduleDraftSave() {
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(() => {
+        const vals = getFormValuesRaw();
+        if (!vals.weight && !vals.heightFt && !vals.height && !vals.notes) return;
+        drafts[selectedDate] = { ...vals, unitSystem, savedAt: new Date().toISOString() };
+        saveDrafts();
+        $('saveStatus').textContent = 'Draft saved';
+      }, 1500);
+    }
+
+    function showToast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    // BMI calculation
+    function calcBMI(weightKg, heightCm) {
+      const hM = heightCm / 100;
+      return weightKg / (hM * hM);
+    }
+
+    // Life stages — determines which BMI reference scale applies
+    const LIFE_STAGES = {
+      infant:      { key: 'infant',      label: 'Infant',       ages: '0–23 months', minMonths: 0,   maxMonths: 23 },
+      child:       { key: 'child',       label: 'Child',        ages: '2–12 years',  minMonths: 24,  maxMonths: 155 },
+      adolescent:  { key: 'adolescent',  label: 'Adolescent',   ages: '13–19 years', minMonths: 156, maxMonths: 239 },
+      adult:       { key: 'adult',       label: 'Adult',        ages: '20–64 years', minMonths: 240, maxMonths: 779 },
+      mature:      { key: 'mature',      label: 'Mature Adult', ages: '65+ years',   minMonths: 780, maxMonths: 9999 }
+    };
+
+    function getAgeAtDate(birthDateStr, entryDateStr) {
+      const [by, bm, bd] = birthDateStr.split('-').map(Number);
+      const [ey, em, ed] = entryDateStr.split('-').map(Number);
+      let months = (ey - by) * 12 + (em - bm);
+      if (ed < bd) months--;
+      if (months < 0) months = 0;
+      const years = Math.floor(months / 12);
+      const remMonths = months % 12;
+      return { months, years, remMonths,
+        label: months < 24 ? `${months} months` : `${years}y ${remMonths}m` };
+    }
+
+    function getLifeStage(ageMonths) {
+      if (ageMonths < 24) return LIFE_STAGES.infant;
+      if (ageMonths < 156) return LIFE_STAGES.child;
+      if (ageMonths < 240) return LIFE_STAGES.adolescent;
+      if (ageMonths < 780) return LIFE_STAGES.adult;
+      return LIFE_STAGES.mature;
+    }
+
+    function interpolatePercentiles(sex, ageMonths) {
+      const table = CDC_PERCENTILES[sex] || CDC_PERCENTILES.male;
+      const keys = Object.keys(table).map(Number).sort((a, b) => a - b);
+      if (ageMonths <= keys[0]) return table[keys[0]];
+      if (ageMonths >= keys[keys.length - 1]) return table[keys[keys.length - 1]];
+      let lo = keys[0], hi = keys[keys.length - 1];
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (ageMonths >= keys[i] && ageMonths <= keys[i + 1]) {
+          lo = keys[i]; hi = keys[i + 1]; break;
+        }
+      }
+      const t = (ageMonths - lo) / (hi - lo);
+      const a = table[lo], b = table[hi];
+      return {
+        p5: +(a.p5 + t * (b.p5 - a.p5)).toFixed(2),
+        p85: +(a.p85 + t * (b.p85 - a.p85)).toFixed(2),
+        p95: +(a.p95 + t * (b.p95 - a.p95)).toFixed(2)
+      };
+    }
+
+    function getAdultCategory(bmi, isMature) {
+      if (bmi < 18.5) return { label: 'Underweight', cls: 'cat-underweight', key: 'underweight', range: 'BMI < 18.5', qualifier: 'WHO/CDC' };
+      if (bmi < 25) return { label: 'Healthy Weight', cls: 'cat-normal', key: 'normal', range: 'BMI 18.5 – 24.9', qualifier: 'WHO/CDC' };
+      if (bmi < 30) return { label: 'Overweight', cls: 'cat-overweight', key: 'overweight', range: 'BMI 25.0 – 29.9', qualifier: 'WHO/CDC' };
+      if (bmi < 35) return { label: 'Obesity Class I', cls: 'cat-obese', key: 'obese', range: 'BMI 30.0 – 34.9', qualifier: 'CDC' };
+      if (bmi < 40) return { label: 'Obesity Class II', cls: 'cat-obese', key: 'obese', range: 'BMI 35.0 – 39.9', qualifier: 'CDC' };
+      const cat = { label: 'Obesity Class III (Severe)', cls: 'cat-obese', key: 'obese', range: 'BMI ≥ 40.0', qualifier: 'CDC' };
+      if (isMature) cat.matureNote = 'BMI 23–27 may be protective in some older adults (WHO ageing report).';
+      return cat;
+    }
+
+    function categorizePediatric(bmi, sex, ageMonths) {
+      const { p5, p85, p95 } = interpolatePercentiles(sex, ageMonths);
+      if (bmi < p5) return { label: 'Underweight', cls: 'cat-underweight', key: 'underweight', range: `< 5th percentile (< ${p5})`, qualifier: 'CDC 2000 Growth Charts', percentile: '< 5th' };
+      if (bmi < p85) return { label: 'Healthy Weight', cls: 'cat-normal', key: 'normal', range: `5th–84th percentile (${p5}–${p85})`, qualifier: 'CDC 2000 Growth Charts', percentile: '5th–84th' };
+      if (bmi < p95) return { label: 'Overweight', cls: 'cat-overweight', key: 'overweight', range: `85th–94th percentile (${p85}–${p95})`, qualifier: 'CDC 2000 Growth Charts', percentile: '85th–94th' };
+      if (bmi >= 35) return { label: 'Severe Obesity', cls: 'cat-obese', key: 'obese', range: `≥ 95th percentile or BMI ≥ 35`, qualifier: 'CDC/AAP 2023', percentile: '≥ 95th' };
+      return { label: 'Obesity', cls: 'cat-obese', key: 'obese', range: `≥ 95th percentile (≥ ${p95})`, qualifier: 'CDC 2000 Growth Charts', percentile: '≥ 95th' };
+    }
+
+    function getCategoryForUser(bmi, entryDate) {
+      if (!userProfile.birthDate) {
+        const cat = getAdultCategory(bmi, false);
+        return { ...cat, lifeStage: LIFE_STAGES.adult, needsProfile: true };
+      }
+      const age = getAgeAtDate(userProfile.birthDate, entryDate);
+      const stage = getLifeStage(age.months);
+
+      if (stage.key === 'infant') {
+        return {
+          label: 'Infant — WHO Standards Apply',
+          cls: 'cat-normal', key: 'normal',
+          range: 'BMI-for-age percentiles begin at age 2',
+          qualifier: 'WHO Child Growth Standards',
+          lifeStage: stage, age, percentile: 'N/A',
+          note: 'For infants under 24 months, clinicians use WHO weight-for-length percentiles, not adult BMI categories.'
+        };
+      }
+      if (stage.key === 'child' || stage.key === 'adolescent') {
+        const cat = categorizePediatric(bmi, userProfile.sex, age.months);
+        return { ...cat, lifeStage: stage, age };
+      }
+      const cat = getAdultCategory(bmi, stage.key === 'mature');
+      return { ...cat, lifeStage: stage, age };
+    }
+
+    function getCategory(bmi, entryDate) {
+      return entryDate ? getCategoryForUser(bmi, entryDate) : getAdultCategory(bmi, false);
+    }
+
+    function lbToKg(lb) { return lb * CONVERSION.LB_TO_KG; }
+    function kgToLb(kg) { return kg * CONVERSION.KG_TO_LB; }
+    function inToCm(inches) { return inches * CONVERSION.IN_TO_CM; }
+    function cmToIn(cm) { return cm * CONVERSION.CM_TO_IN; }
+
+    function imperialToMetric(lb, ft, inches) {
+      const totalIn = (ft || 0) * 12 + (inches || 0);
+      return { weightKg: lbToKg(lb), heightCm: inToCm(totalIn) };
+    }
+
+    function formatWeightDisplay(kg) {
+      return unitSystem === 'metric' ? `${kg} kg` : `${kgToLb(kg).toFixed(1)} lb`;
+    }
+
+    function formatHeightDisplay(cm) {
+      if (unitSystem === 'metric') return `${cm} cm`;
+      const totalIn = cmToIn(cm);
+      const ft = Math.floor(totalIn / 12);
+      const inches = Math.round((totalIn % 12) * 10) / 10;
+      return `${ft}'${inches}"`;
+    }
+
+    function getCategoryColor(bmi, entryDate) {
+      return ZONE_COLORS[getCategory(bmi, entryDate || selectedDate).key];
+    }
+
+    function updateProfileUI() {
+      const bd = $('profileBirthDate');
+      const sx = $('profileSex');
+      if (bd) {
+        bd.value = userProfile.birthDate || '';
+        bd.max = formatDate(new Date());
+      }
+      if (sx) sx.value = userProfile.sex || 'male';
+
+      const warn = $('profileWarning');
+      const stageEl = $('profileLifeStage');
+      const entryStage = $('entryLifeStage');
+
+      if (!userProfile.birthDate) {
+        if (warn) warn.style.display = '';
+        if (stageEl) stageEl.innerHTML = 'Enter birth date to determine life stage and BMI reference scale.';
+        if (entryStage) entryStage.style.display = 'none';
+        renderCategoriesPanel(LIFE_STAGES.adult);
+        return;
+      }
+
+      if (warn) warn.style.display = 'none';
+      const age = getAgeAtDate(userProfile.birthDate, selectedDate);
+      const stage = getLifeStage(age.months);
+      if (stageEl) {
+        stageEl.innerHTML = `<strong>Today:</strong> ${stage.label} (${stage.ages}) · Age ${age.label}<br>
+          <span style="color:var(--text-muted);font-size:0.72rem;">Scale: ${getScaleDescription(stage)}</span>`;
+      }
+      if (entryStage) {
+        entryStage.textContent = stage.label;
+        entryStage.className = `life-stage-badge ${stage.key}`;
+        entryStage.style.display = '';
+      }
+      renderCategoriesPanel(stage, age);
+    }
+
+    function getScaleDescription(stage) {
+      if (stage.key === 'infant') return 'WHO weight-for-length (BMI charts from age 2)';
+      if (stage.key === 'child' || stage.key === 'adolescent') return 'CDC BMI-for-age sex-specific percentiles';
+      if (stage.key === 'mature') return 'WHO/CDC adult BMI + geriatric context';
+      return 'WHO/CDC fixed BMI cutoffs';
+    }
+
+    function renderCategoriesPanel(stage, age) {
+      const panel = $('bmiCategoriesPanel');
+      const label = $('categoriesStageLabel');
+      if (!panel) return;
+      label.textContent = `(${stage.label})`;
+
+      if (stage.key === 'infant') {
+        panel.innerHTML = `
+          <p>BMI-for-age percentile charts begin at <strong>age 2</strong>. For infants 0–23 months:</p>
+          <ul style="margin:0.5rem 0 0 1rem;font-size:0.78rem;">
+            <li>Use <strong>WHO Child Growth Standards</strong></li>
+            <li>Screen with <strong>weight-for-length</strong> percentiles</li>
+            <li>Consult pediatrician for interpretation</li>
+          </ul>`;
+        return;
+      }
+
+      if (stage.key === 'child' || stage.key === 'adolescent') {
+        const sex = userProfile.sex || 'male';
+        const months = age?.months || (stage.key === 'child' ? 84 : 192);
+        const { p5, p85, p95 } = interpolatePercentiles(sex, months);
+        panel.innerHTML = `
+          <div><span class="bmi-category cat-underweight" style="font-size:0.65rem;">Under</span> &lt; 5th %ile (&lt; ${p5})</div>
+          <div><span class="bmi-category cat-normal" style="font-size:0.65rem;">Healthy</span> 5th–84th %ile</div>
+          <div><span class="bmi-category cat-overweight" style="font-size:0.65rem;">Over</span> 85th–94th %ile</div>
+          <div><span class="bmi-category cat-obese" style="font-size:0.65rem;">Obese</span> ≥ 95th %ile (≥ ${p95})</div>
+          <p style="margin-top:0.75rem;font-size:0.72rem;color:var(--text-muted);">
+            CDC 2000 Growth Charts · Sex: ${sex} · Age at entry determines percentile thresholds.
+          </p>`;
+        return;
+      }
+
+      panel.innerHTML = `
+        <div><span class="bmi-category cat-underweight" style="font-size:0.65rem;">Under</span> &lt; 18.5</div>
+        <div><span class="bmi-category cat-normal" style="font-size:0.65rem;">Healthy</span> 18.5 – 24.9</div>
+        <div><span class="bmi-category cat-overweight" style="font-size:0.65rem;">Over</span> 25.0 – 29.9</div>
+        <div><span class="bmi-category cat-obese" style="font-size:0.65rem;">Obese I</span> 30.0 – 34.9</div>
+        <div><span class="bmi-category cat-obese" style="font-size:0.65rem;">Obese II</span> 35.0 – 39.9</div>
+        <div><span class="bmi-category cat-obese" style="font-size:0.65rem;">Obese III</span> ≥ 40.0</div>
+        <p style="margin-top:0.75rem;font-size:0.72rem;color:var(--text-muted);">
+          WHO/CDC adult categories${stage.key === 'mature' ? ' · BMI 23–27 may be protective in some older adults' : ''}.
+        </p>`;
+    }
+
+    function saveProfile() {
+      userProfile.birthDate = $('profileBirthDate').value || null;
+      userProfile.sex = $('profileSex').value;
+      saveSettings();
+      updateProfileUI();
+      if (entries[selectedDate]) displayBMI(entries[selectedDate].bmi, selectedDate);
+      else populateFormForDate(selectedDate);
+      showToast('Profile saved — BMI scale updated.');
+    }
+
+    function getSortedEntries() {
+      return Object.entries(entries)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([date, e]) => ({ date, ...e }));
+    }
+
+    function daysInMonth(year, month) {
+      return new Date(year, month, 0).getDate();
+    }
+
+    function escapeCSV(val) {
+      const s = String(val ?? '');
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (inQ) {
+          if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+          else if (c === '"') inQ = false;
+          else cur += c;
+        } else {
+          if (c === '"') inQ = true;
+          else if (c === ',') { result.push(cur); cur = ''; }
+          else cur += c;
+        }
+      }
+      result.push(cur);
+      return result;
+    }
+
+    function refreshAllViews() {
+      syncUnitToggleUI();
+      loadGoalsUI();
+      renderCalendar();
+      renderHistory();
+      updateEntryCount();
+      updateProfileUI();
+      renderInsights();
+      updateBackupStatus();
+      if (activeTab === 'graphs') renderChart();
+      if (activeTab === 'bulk') renderBulkTable();
+    }
+
+    // ─── Goals & Insights ───
+    function entriesWithinDays(sorted, days, fromDate) {
+      const end = fromDate ? new Date(fromDate) : new Date(sorted[sorted.length - 1].date);
+      const start = new Date(end);
+      start.setDate(start.getDate() - days);
+      return sorted.filter(e => {
+        const d = new Date(e.date);
+        return d >= start && d <= end;
+      });
+    }
+
+    function movingAverage(arr, field) {
+      if (!arr.length) return null;
+      return arr.reduce((s, e) => s + e[field], 0) / arr.length;
+    }
+
+    function calcLoggingStreak(sorted) {
+      if (!sorted.length) return 0;
+      let streak = 1;
+      for (let i = sorted.length - 1; i > 0; i--) {
+        const curr = new Date(sorted[i].date);
+        const prev = new Date(sorted[i - 1].date);
+        if (Math.round((curr - prev) / 86400000) === 1) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    function computeInsights() {
+      const sorted = getSortedEntries();
+      if (!sorted.length) return null;
+      const latest = sorted[sorted.length - 1];
+      const first = sorted[0];
+      const last7 = entriesWithinDays(sorted, 7);
+      const last30 = entriesWithinDays(sorted, 30);
+      const prior7End = new Date(latest.date);
+      prior7End.setDate(prior7End.getDate() - 7);
+      const prior7 = sorted.filter(e => {
+        const d = new Date(e.date);
+        const start = new Date(prior7End);
+        start.setDate(start.getDate() - 7);
+        return d >= start && d < prior7End;
+      });
+
+      const ma7bmi = movingAverage(last7, 'bmi');
+      const ma30bmi = movingAverage(last30, 'bmi');
+      const ma7wt = movingAverage(last7, 'weightKg');
+      const ma30wt = movingAverage(last30, 'weightKg');
+      const weeklyWtChange = prior7.length && last7.length
+        ? ma7wt - movingAverage(prior7, 'weightKg') : null;
+      const weeklyBmiChange = prior7.length && last7.length
+        ? ma7bmi - movingAverage(prior7, 'bmi') : null;
+      const totalBmiChange = latest.bmi - first.bmi;
+      const totalWtChange = latest.weightKg - first.weightKg;
+
+      return {
+        sorted, latest, first, streak: calcLoggingStreak(sorted),
+        ma7bmi, ma30bmi, ma7wt, ma30wt,
+        weeklyWtChange, weeklyBmiChange,
+        totalBmiChange, totalWtChange,
+        entryCount: sorted.length
+      };
+    }
+
+    function calcGoalProgress(insights) {
+      if (!insights) return null;
+      const { sorted, latest, first } = insights;
+      if (userGoals.type === 'weight' && userGoals.targetWeightKg) {
+        const start = first.weightKg, curr = latest.weightKg, target = userGoals.targetWeightKg;
+        const total = target - start;
+        const done = curr - start;
+        const pct = Math.abs(total) < 0.01 ? 100 : Math.min(100, Math.max(0, (done / total) * 100));
+        return { type: 'weight', pct, start, current: curr, target, remaining: curr - target, unit: 'kg' };
+      }
+      if (userGoals.type === 'bmi' && userGoals.targetBmi) {
+        const start = first.bmi, curr = latest.bmi, target = userGoals.targetBmi;
+        const total = target - start;
+        const done = curr - start;
+        const pct = Math.abs(total) < 0.01 ? 100 : Math.min(100, Math.max(0, (done / total) * 100));
+        return { type: 'bmi', pct, start, current: curr, target, remaining: curr - target, unit: 'BMI' };
+      }
+      return null;
+    }
+
+    function renderInsights() {
+      const grid = $('insightsGrid');
+      if (!grid) return;
+      const ins = computeInsights();
+      if (!ins) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Add entries to see trend insights.</div>';
+        $('goalProgressSection').style.display = 'none';
+        return;
+      }
+
+      const fmtDelta = (v, dec = 1) => {
+        if (v == null || isNaN(v)) return '—';
+        const sign = v > 0 ? '+' : '';
+        return sign + v.toFixed(dec);
+      };
+      const deltaClass = v => v > 0 ? 'positive' : v < 0 ? 'negative' : '';
+
+      grid.innerHTML = `
+        <div class="insight-card"><div class="insight-val">${ins.ma7bmi?.toFixed(1) ?? '—'}</div><div class="insight-lbl">7-Day Avg BMI</div></div>
+        <div class="insight-card"><div class="insight-val">${ins.ma30bmi?.toFixed(1) ?? '—'}</div><div class="insight-lbl">30-Day Avg BMI</div></div>
+        <div class="insight-card"><div class="insight-val ${deltaClass(ins.weeklyBmiChange)}">${fmtDelta(ins.weeklyBmiChange)}</div><div class="insight-lbl">Weekly BMI Δ</div></div>
+        <div class="insight-card"><div class="insight-val ${deltaClass(ins.weeklyWtChange)}">${ins.weeklyWtChange != null ? fmtDelta(unitSystem === 'metric' ? ins.weeklyWtChange : kgToLb(ins.weeklyWtChange)) + (unitSystem === 'metric' ? ' kg' : ' lb') : '—'}</div><div class="insight-lbl">Weekly Wt Δ</div></div>
+        <div class="insight-card"><div class="insight-val">${ins.streak}</div><div class="insight-lbl">Day Streak</div></div>
+        <div class="insight-card"><div class="insight-val">${ins.entryCount}</div><div class="insight-lbl">Total Entries</div></div>
+      `;
+
+      const prog = calcGoalProgress(ins);
+      const sec = $('goalProgressSection');
+      if (prog && sec) {
+        sec.style.display = '';
+        $('goalProgressFill').style.width = prog.pct.toFixed(0) + '%';
+        $('goalProgressPct').textContent = prog.pct.toFixed(0) + '%';
+        const fmtVal = v => prog.type === 'weight'
+          ? (unitSystem === 'metric' ? v.toFixed(1) + ' kg' : kgToLb(v).toFixed(1) + ' lb')
+          : v.toFixed(1);
+        $('goalProgressStart').textContent = fmtVal(prog.start);
+        $('goalProgressTarget').textContent = fmtVal(prog.target);
+        const rem = prog.remaining;
+        const remStr = prog.type === 'weight'
+          ? (unitSystem === 'metric' ? Math.abs(rem).toFixed(1) + ' kg' : Math.abs(kgToLb(rem)).toFixed(1) + ' lb')
+          : Math.abs(rem).toFixed(1) + ' BMI';
+        const dir = rem > 0.05 ? 'above' : rem < -0.05 ? 'below' : 'at';
+        $('goalDistanceText').innerHTML = `<strong>${fmtVal(prog.current)}</strong> — ${dir === 'at' ? 'at your goal!' : remStr + ' ' + dir + ' goal'}`;
+      } else if (sec) sec.style.display = 'none';
+    }
+
+    function loadGoalsUI() {
+      document.querySelectorAll('#goalTypeToggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.goal === userGoals.type);
+      });
+      const isWeight = userGoals.type === 'weight';
+      $('goalWeightField').style.display = isWeight ? '' : 'none';
+      $('goalBmiField').style.display = isWeight ? 'none' : '';
+
+      const wInput = $('goalTargetWeight');
+      const bInput = $('goalTargetBmi');
+      $('goalWeightLabel').textContent = goalWeightLabel();
+      wInput.placeholder = unitSystem === 'metric' ? 'e.g. 70' : 'e.g. 154';
+      wInput.min = '1';
+      wInput.max = unitSystem === 'metric' ? '500' : '1100';
+      wInput.step = '0.1';
+
+      if (userGoals.targetWeightKg) {
+        wInput.value = displayWeightFromKg(userGoals.targetWeightKg);
+      } else wInput.value = '';
+
+      if (userGoals.targetBmi) bInput.value = userGoals.targetBmi;
+      else bInput.value = '';
+
+      $('goalTargetDate').value = userGoals.targetDate || '';
+      const hint = $('goalUnitHint');
+      if (hint) {
+        hint.textContent = unitSystem === 'metric'
+          ? 'Goal weight in kg — matches your saved unit preference.'
+          : 'Goal weight in lb — matches your saved unit preference.';
+      }
+    }
+
+    function saveGoals() {
+      userGoals.type = document.querySelector('#goalTypeToggle button.active')?.dataset.goal || 'weight';
+      if (userGoals.type === 'weight') {
+        userGoals.targetWeightKg = parseWeightInput($('goalTargetWeight').value);
+        userGoals.targetBmi = null;
+      } else {
+        const bmi = parseFloat($('goalTargetBmi').value);
+        userGoals.targetBmi = bmi > 0 ? bmi : null;
+        userGoals.targetWeightKg = null;
+      }
+      userGoals.targetDate = $('goalTargetDate').value || null;
+      saveSettings();
+      renderInsights();
+      showToast('Goals saved.');
+    }
+
+    function setGoalType(type) {
+      if (userGoals.type === 'weight') {
+        userGoals.targetWeightKg = parseWeightInput($('goalTargetWeight')?.value);
+      } else {
+        const bmi = parseFloat($('goalTargetBmi')?.value);
+        if (bmi > 0) userGoals.targetBmi = bmi;
+      }
+      userGoals.type = type;
+      saveSettings();
+      loadGoalsUI();
+    }
+
+    let goalSaveTimer;
+    function scheduleGoalSave() {
+      clearTimeout(goalSaveTimer);
+      goalSaveTimer = setTimeout(saveGoals, 800);
+    }
+
+    function flushPendingSaves() {
+      clearTimeout(goalSaveTimer);
+      clearTimeout(draftTimer);
+      const goalType = document.querySelector('#goalTypeToggle button.active')?.dataset.goal || userGoals.type;
+      if (goalType === 'weight') {
+        const wVal = $('goalTargetWeight')?.value;
+        if (wVal) {
+          userGoals.type = 'weight';
+          userGoals.targetWeightKg = parseWeightInput(wVal);
+          userGoals.targetBmi = null;
+        }
+      } else {
+        const bmi = parseFloat($('goalTargetBmi')?.value);
+        if (bmi > 0) {
+          userGoals.type = 'bmi';
+          userGoals.targetBmi = bmi;
+          userGoals.targetWeightKg = null;
+        }
+      }
+      if ($('goalTargetDate')) userGoals.targetDate = $('goalTargetDate').value || null;
+      saveSettings();
+      const vals = getFormValuesRaw();
+      if (vals.weight || vals.height || vals.heightFt || vals.notes) {
+        drafts[selectedDate] = { ...vals, unitSystem, savedAt: new Date().toISOString() };
+        saveDrafts();
+      }
+    }
+
+    // ─── Doctor Report ───
+    function buildDoctorReportHTML() {
+      const ins = computeInsights();
+      const sorted = ins?.sorted || [];
+      const recent = sorted.slice(-12).reverse();
+      const prog = calcGoalProgress(ins);
+      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const stage = userProfile.birthDate ? getLifeStage(getAgeAtDate(userProfile.birthDate, formatDate(new Date())).months) : null;
+
+      let rows = recent.map(e => `
+        <tr>
+          <td>${formatDisplayDate(e.date)}</td>
+          <td>${formatWeightDisplay(e.weightKg)}</td>
+          <td>${formatHeightDisplay(e.heightCm)}</td>
+          <td>${e.bmi}</td>
+          <td>${e.category}</td>
+          <td>${e.lifeStage || '—'}</td>
+          <td>${(e.notes || '—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</td>
+        </tr>
+      `).join('');
+
+      if (!rows) rows = '<tr><td colspan="7" style="text-align:center;color:#666;">No entries recorded</td></tr>';
+
+      const fmtGoal = (v, type) => type === 'weight'
+        ? (unitSystem === 'metric' ? v.toFixed(1) + ' kg' : kgToLb(v).toFixed(1) + ' lb')
+        : v.toFixed(1) + ' BMI';
+      const goalText = prog
+        ? `Target ${fmtGoal(prog.target, prog.type)} — currently ${fmtGoal(prog.current, prog.type)}, ${prog.pct.toFixed(0)}% progress`
+        : userGoals.targetWeightKg
+          ? `Target ${fmtGoal(userGoals.targetWeightKg, 'weight')} (saved)`
+          : userGoals.targetBmi
+            ? `Target ${userGoals.targetBmi} BMI (saved)`
+            : 'No goal set';
+
+      return `
+        <div style="border-bottom:2px solid #14b8a6;padding-bottom:0.75rem;margin-bottom:1rem;">
+          <h1 style="font-family:Georgia,serif;font-size:1.5rem;margin:0;color:#111;">Vitae Health Summary</h1>
+          <p style="margin:0.25rem 0 0;font-size:0.85rem;color:#555;">Generated ${today} · Personal health log — not a medical diagnosis</p>
+        </div>
+
+        <h3>Patient Profile</h3>
+        <p><strong>Birth date:</strong> ${userProfile.birthDate || 'Not provided'} ·
+           <strong>Sex:</strong> ${userProfile.sex || '—'} ·
+           <strong>Life stage:</strong> ${stage?.label || 'Adult (assumed)'}</p>
+
+        <h3>Goals</h3>
+        <p>${goalText}${userGoals.targetDate ? ' · Target date: ' + formatDisplayDate(userGoals.targetDate) : ''}</p>
+
+        <h3>Trend Summary</h3>
+        <p>${ins ? `
+          <strong>${ins.entryCount}</strong> entries ·
+          Latest BMI <strong>${ins.latest.bmi}</strong> (${ins.latest.category}) ·
+          7-day avg <strong>${ins.ma7bmi?.toFixed(1) ?? '—'}</strong> ·
+          30-day avg <strong>${ins.ma30bmi?.toFixed(1) ?? '—'}</strong> ·
+          Weekly BMI change <strong>${ins.weeklyBmiChange != null ? (ins.weeklyBmiChange >= 0 ? '+' : '') + ins.weeklyBmiChange.toFixed(1) : '—'}</strong> ·
+          Logging streak <strong>${ins.streak}</strong> day(s)
+        ` : 'Insufficient data'}</p>
+
+        <h3>Recent Entries (last ${recent.length})</h3>
+        <table class="report-table">
+          <thead><tr><th>Date</th><th>Weight</th><th>Height</th><th>BMI</th><th>Category</th><th>Stage</th><th>Journal</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+
+        <h3>References</h3>
+        <p style="font-size:0.78rem;">BMI categories per WHO/CDC (adults) and CDC 2000 Growth Charts (ages 2–19). Conversions: NIST LB_TO_KG 0.45359237, IN_TO_CM 2.54.</p>
+
+        <p style="font-size:0.75rem;color:#777;margin-top:1.5rem;border-top:1px solid #ddd;padding-top:0.75rem;">
+          <strong>Disclaimer:</strong> For personal tracking and clinical discussion only. BMI is a screening tool and does not distinguish muscle from fat mass. Consult a healthcare provider for medical decisions.
+        </p>
+      `;
+    }
+
+    function showDoctorReport() {
+      $('doctorReportContent').innerHTML = buildDoctorReportHTML();
+      $('doctorReportModal').classList.add('open');
+    }
+
+    function printDoctorReport() {
+      $('doctorReportContent').innerHTML = buildDoctorReportHTML();
+      $('doctorReportModal').classList.add('open', 'printing');
+      setTimeout(() => { window.print(); $('doctorReportModal').classList.remove('printing'); }, 300);
+    }
+
+    function downloadDoctorReport() {
+      const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Vitae Health Report</title>
+        <style>body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;color:#111;line-height:1.5}
+        h3{color:#0d9488;margin-top:1.25rem}table{width:100%;border-collapse:collapse;font-size:0.85rem}
+        th,td{border:1px solid #ccc;padding:0.4rem;text-align:left}th{background:#f5f5f5}</style></head>
+        <body>${buildDoctorReportHTML()}</body></html>`;
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'vitae-doctor-report-' + formatDate(new Date()) + '.html';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Doctor report downloaded.');
+    }
+
+    // ─── Backup & PWA ───
+    function recordExportDate() {
+      localStorage.setItem(LAST_EXPORT_KEY, new Date().toISOString());
+      updateBackupStatus();
+    }
+
+    function updateBackupStatus() {
+      const el = $('backupStatus');
+      if (!el) return;
+      const last = localStorage.getItem(LAST_EXPORT_KEY);
+      const count = Object.keys(entries).length;
+      if (!count) {
+        el.textContent = 'No entries yet — export reminder will activate once you have data.';
+        el.className = 'backup-status';
+        return;
+      }
+      if (!last) {
+        el.innerHTML = '<strong>No CSV backup on record.</strong> Export now to create your first off-device backup.';
+        el.className = 'backup-status warn';
+        return;
+      }
+      const days = Math.floor((Date.now() - new Date(last)) / 86400000);
+      const dateStr = new Date(last).toLocaleDateString();
+      if (days >= 7) {
+        el.innerHTML = `<strong>Backup overdue.</strong> Last export: ${dateStr} (${days} days ago). Weekly export recommended.`;
+        el.className = 'backup-status warn';
+      } else {
+        el.innerHTML = `Last CSV export: <strong>${dateStr}</strong> (${days} day${days === 1 ? '' : 's'} ago) · ${count} entries stored locally`;
+        el.className = 'backup-status';
+      }
+    }
+
+    function checkWeeklyBackup() {
+      if (!Object.keys(entries).length) return;
+      if (localStorage.getItem(BACKUP_REMINDER_KEY) === 'false') return;
+      const snooze = localStorage.getItem(BACKUP_SNOOZE_KEY);
+      if (snooze && Date.now() < parseInt(snooze)) return;
+      const last = localStorage.getItem(LAST_EXPORT_KEY);
+      const daysSince = last ? (Date.now() - new Date(last)) / 86400000 : 999;
+      if (daysSince >= 7) $('backupModal')?.classList.add('open');
+    }
+
+    function isDesktopApp() {
+      return !!(window.__TAURI_INTERNALS__ || window.__TAURI__);
+    }
+
+    function registerServiceWorker() {
+      if (isDesktopApp() || !('serviceWorker' in navigator) || location.protocol === 'file:') return;
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    function bmiToGaugePercent(bmi) {
+      const min = 16, max = 40;
+      return Math.min(100, Math.max(0, ((bmi - min) / (max - min)) * 100));
+    }
+
+    function getFormValuesRaw() {
+      return {
+        weight: $('weight')?.value || '',
+        height: $('height')?.value || '',
+        heightFt: $('heightFt')?.value || '',
+        heightIn: $('heightIn')?.value || '',
+        notes: $('entryNotes')?.value || ''
+      };
+    }
+
+    function getFormValues() {
+      const w = parseFloat($('weight').value);
+      if (unitSystem === 'metric') {
+        const h = parseFloat($('height')?.value);
+        return { weightKg: w, heightCm: h };
+      }
+      const ft = parseFloat($('heightFt')?.value || 0);
+      const inches = parseFloat($('heightIn')?.value || 0);
+      const m = imperialToMetric(w, ft, inches);
+      return { weightKg: m.weightKg, heightCm: m.heightCm };
+    }
+
+    function syncUnitToggleUI() {
+      document.querySelectorAll('#unitToggle button, #globalUnitToggle button, #bulkUnitToggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.unit === unitSystem);
+      });
+      if ($('bulkWeightHeader')) {
+        $('bulkWeightHeader').textContent = unitSystem === 'metric' ? 'Wt (kg)' : 'Wt (lb)';
+        $('bulkHeightHeader').textContent = unitSystem === 'metric' ? 'Ht (cm)' : 'Ht (ft · in)';
+      }
+      const wf = $('weightField')?.querySelector('label');
+      if (wf) wf.textContent = weightLabel();
+      const gw = $('goalWeightLabel');
+      if (gw) gw.textContent = goalWeightLabel();
+      updateUnitPrefBadge();
+    }
+
+    function buildHeightFieldHTML() {
+      if (unitSystem === 'metric') {
+        return `<label for="height">${heightLabel()}</label>
+          <input type="number" id="height" step="0.1" min="30" max="300" placeholder="e.g. 175">`;
+      }
+      return `<label>${heightLabel()}</label>
+        <div class="imperial-height">
+          <input type="number" id="heightFt" step="1" min="1" max="8" placeholder="ft">
+          <input type="number" id="heightIn" step="0.5" min="0" max="11.9" placeholder="in">
+        </div>`;
+    }
+
+    function applyUnitFieldsToDOM() {
+      const wf = $('weightField');
+      const hf = $('heightField');
+      if (wf) {
+        const label = wf.querySelector('label');
+        const input = $('weight');
+        if (label) label.textContent = weightLabel();
+        if (input) {
+          input.placeholder = unitSystem === 'metric' ? 'e.g. 72.5' : 'e.g. 160';
+          input.min = '1';
+          input.max = unitSystem === 'metric' ? '500' : '1100';
+        }
+      }
+      if (hf) hf.innerHTML = buildHeightFieldHTML();
+      bindFormAutoSave();
+    }
+
+    function setUnitSystem(unit, options = {}) {
+      const prevUnit = unitSystem;
+      const preserveValues = options.preserveValues !== false;
+
+      let weightKg, heightCm, goalWeightKg;
+      if (preserveValues) {
+        const wEl = $('weight');
+        if (wEl?.value) {
+          try {
+            const parsed = getFormValues();
+            if (parsed.weightKg > 0 && parsed.heightCm > 0) {
+              weightKg = parsed.weightKg;
+              heightCm = parsed.heightCm;
+            }
+          } catch { /* form mid-rebuild */ }
+        }
+        const gwInput = $('goalTargetWeight');
+        if (gwInput?.value && userGoals.type === 'weight') {
+          goalWeightKg = parseWeightInput(gwInput.value);
+        }
+      }
+
+      unitSystem = unit;
+      if (!options.skipSave) saveSettings();
+      syncUnitToggleUI();
+      applyUnitFieldsToDOM();
+
+      if (weightKg && heightCm) {
+        $('weight').value = displayWeightFromKg(weightKg);
+        if (unitSystem === 'metric') {
+          const h = $('height');
+          if (h) h.value = heightCm.toFixed(1);
+        } else {
+          const totalIn = cmToIn(heightCm);
+          const ftEl = $('heightFt'), inEl = $('heightIn');
+          if (ftEl) ftEl.value = Math.floor(totalIn / 12);
+          if (inEl) inEl.value = Math.round((totalIn % 12) * 10) / 10;
+        }
+      } else if (!options.skipPopulate) {
+        populateFormForDate(selectedDate);
+      }
+
+      if (goalWeightKg) userGoals.targetWeightKg = goalWeightKg;
+      if (prevUnit !== unit || options.refreshBulk) {
+        if (activeTab === 'bulk') renderBulkTable();
+      }
+      loadGoalsUI();
+      renderInsights();
+    }
+
+    function bindFormAutoSave() {
+      ['weight', 'height', 'heightFt', 'heightIn', 'entryNotes'].forEach(id => {
+        const el = $(id);
+        if (el && !el.dataset.bound) {
+          el.dataset.bound = '1';
+          el.addEventListener('input', scheduleDraftSave);
+        }
+      });
+    }
+
+    // Calendar rendering
+    function renderCalendar() {
+      const grid = $('calendarGrid');
+      grid.innerHTML = '';
+
+      const monthNames = ['January','February','March','April','May','June',
+        'July','August','September','October','November','December'];
+      $('calMonthLabel').textContent = `${monthNames[viewMonth]} ${viewYear}`;
+
+      const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      const today = formatDate(new Date());
+
+      for (let i = 0; i < firstDay; i++) {
+        const el = document.createElement('div');
+        el.className = 'cal-day empty';
+        grid.appendChild(el);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = formatDate(new Date(viewYear, viewMonth, d));
+        const el = document.createElement('div');
+        el.className = 'cal-day';
+        el.textContent = d;
+
+        if (dateStr > today) el.classList.add('future');
+        if (dateStr === today) el.classList.add('today');
+        if (dateStr === selectedDate) el.classList.add('selected');
+        if (entries[dateStr]) el.classList.add('has-entry');
+
+        if (dateStr <= today) {
+          el.addEventListener('click', () => selectDate(dateStr));
+        }
+        grid.appendChild(el);
+      }
+    }
+
+    function selectDate(dateStr) {
+      selectedDate = dateStr;
+      $('selectedDateDisplay').textContent = formatDisplayDate(dateStr);
+      updateProfileUI();
+      renderCalendar();
+      populateFormForDate(dateStr);
+    }
+
+    function populateFormForDate(dateStr) {
+      const entry = entries[dateStr];
+      const hint = $('existingEntryHint');
+      const delBtn = $('btnDelete');
+      const result = $('bmiResult');
+
+      const notesEl = $('entryNotes');
+      if (entry) {
+        hint.textContent = 'Existing entry — edit to update';
+        delBtn.style.display = '';
+        $('weight').value = displayWeightFromKg(entry.weightKg);
+
+        if (unitSystem === 'metric') {
+          const hInput = $('height');
+          if (hInput) hInput.value = entry.heightCm.toFixed(1);
+        } else {
+          const totalIn = cmToIn(entry.heightCm);
+          const ft = Math.floor(totalIn / 12);
+          const inches = Math.round((totalIn % 12) * 10) / 10;
+          const ftEl = $('heightFt');
+          const inEl = $('heightIn');
+          if (ftEl) ftEl.value = ft;
+          if (inEl) inEl.value = inches;
+        }
+        if (notesEl) notesEl.value = entry.notes || '';
+        delete drafts[dateStr];
+        saveDrafts();
+        displayBMI(entry.bmi, dateStr);
+      } else {
+        hint.textContent = 'New entry';
+        delBtn.style.display = 'none';
+        const draft = drafts[dateStr];
+        if (draft && draft.unitSystem === unitSystem) {
+          $('weight').value = draft.weight || '';
+          if (unitSystem === 'metric') {
+            if ($('height')) $('height').value = draft.height || '';
+          } else {
+            if ($('heightFt')) $('heightFt').value = draft.heightFt || '';
+            if ($('heightIn')) $('heightIn').value = draft.heightIn || '';
+          }
+          if (notesEl) notesEl.value = draft.notes || '';
+          hint.textContent = 'Draft restored — save to confirm';
+        } else {
+          $('weight').value = '';
+          if ($('height')) $('height').value = '';
+          if ($('heightFt')) { $('heightFt').value = ''; $('heightIn').value = ''; }
+          if (notesEl) notesEl.value = '';
+        }
+        result.classList.remove('visible');
+      }
+    }
+
+    function displayBMI(bmi, entryDate) {
+      const date = entryDate || selectedDate;
+      const cat = getCategoryForUser(bmi, date);
+      $('bmiValue').textContent = bmi.toFixed(1);
+      const catEl = $('bmiCategory');
+      catEl.textContent = cat.label;
+      catEl.className = `bmi-category ${cat.cls}`;
+      let detail = `${cat.range} · ${cat.qualifier}`;
+      if (cat.age) detail = `Age ${cat.age.label} · ${detail}`;
+      if (cat.percentile && cat.percentile !== 'N/A') detail += ` · ${cat.percentile} percentile`;
+      if (cat.note) detail += ` — ${cat.note}`;
+      if (cat.matureNote) detail += ` — ${cat.matureNote}`;
+      $('bmiCategoryDetail').textContent = detail;
+      $('bmiMarker').style.left = bmiToGaugePercent(bmi) + '%';
+      $('bmiResult').classList.add('visible');
+    }
+
+    function saveEntry() {
+      const { weightKg, heightCm } = getFormValues();
+      if (!weightKg || weightKg <= 0 || !heightCm || heightCm <= 0) {
+        showToast('Please enter valid weight and height.');
+        return;
+      }
+
+      const bmi = calcBMI(weightKg, heightCm);
+      const cat = getCategoryForUser(bmi, selectedDate);
+      const age = userProfile.birthDate ? getAgeAtDate(userProfile.birthDate, selectedDate) : null;
+
+      const notes = ($('entryNotes')?.value || '').trim();
+      entries[selectedDate] = {
+        weightKg: Math.round(weightKg * 100) / 100,
+        heightCm: Math.round(heightCm * 100) / 100,
+        bmi: Math.round(bmi * 10) / 10,
+        category: cat.label,
+        lifeStage: cat.lifeStage?.label || 'Adult',
+        ageAtEntry: age?.label || '',
+        bmiPercentile: cat.percentile || '',
+        unitSystem,
+        notes,
+        recordedAt: entries[selectedDate]?.recordedAt || new Date().toISOString()
+      };
+
+      delete drafts[selectedDate];
+      saveDrafts();
+      saveEntries();
+      displayBMI(bmi, selectedDate);
+      refreshAllViews();
+      $('existingEntryHint').textContent = 'Existing entry — edit to update';
+      $('btnDelete').style.display = '';
+      showToast('Entry saved successfully.');
+    }
+
+    function deleteEntry() {
+      if (!entries[selectedDate]) return;
+      if (!confirm(`Delete entry for ${formatDisplayDate(selectedDate)}?`)) return;
+      delete entries[selectedDate];
+      saveEntries();
+      refreshAllViews();
+      populateFormForDate(selectedDate);
+      showToast('Entry deleted.');
+    }
+
+    function renderHistory() {
+      const list = $('historyList');
+      const sorted = Object.entries(entries)
+        .sort((a, b) => b[0].localeCompare(a[0]))
+        .slice(0, 20);
+
+      if (!sorted.length) {
+        list.innerHTML = '<div class="empty-state">No entries yet. Select a date and record your metrics.</div>';
+        return;
+      }
+
+      list.innerHTML = sorted.map(([date, e]) => `
+        <div class="history-item" data-date="${date}">
+          <div>
+            <div class="history-date">${formatDisplayDate(date)}</div>
+            <div class="history-meta">${e.lifeStage || 'Adult'} · ${formatWeightDisplay(e.weightKg)} · ${formatHeightDisplay(e.heightCm)}${e.notes ? ' · 📝' : ''}</div>
+          </div>
+          <div class="history-bmi" style="color:var(--accent-teal)">${e.bmi}</div>
+        </div>
+      `).join('');
+
+      list.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const [y, m] = item.dataset.date.split('-').map(Number);
+          viewYear = y;
+          viewMonth = m - 1;
+          switchTab('calendar');
+          selectDate(item.dataset.date);
+          renderCalendar();
+        });
+      });
+    }
+
+    function renderLifespan(group) {
+      const data = LIFESPAN_DATA[group];
+      $('lifespanStats').innerHTML = data.stats.map(s => `
+        <div class="stat-box">
+          <div class="stat-value">${s.value}</div>
+          <div class="stat-label">${s.label}</div>
+        </div>
+      `).join('');
+      $('lifespanNote').innerHTML = data.note;
+    }
+
+    // CSV export / import
+    function heightToImperialParts(cm) {
+      const totalIn = cmToIn(cm);
+      return {
+        ft: Math.floor(totalIn / 12),
+        inches: Math.round((totalIn % 12) * 10) / 10
+      };
+    }
+
+    function parseCSVWeightKg(cols, header) {
+      const kgIdx = header.indexOf('weight_kg');
+      const lbIdx = header.indexOf('weight_lb');
+      const kg = kgIdx >= 0 ? parseFloat(cols[kgIdx]) : NaN;
+      const lb = lbIdx >= 0 ? parseFloat(cols[lbIdx]) : NaN;
+      if (kg > 0) return kg;
+      if (lb > 0) return lbToKg(lb);
+      return null;
+    }
+
+    function parseCSVHeightCm(cols, header) {
+      const cmIdx = header.indexOf('height_cm');
+      const ftIdx = header.indexOf('height_ft');
+      const inIdx = header.indexOf('height_in');
+      const cm = cmIdx >= 0 ? parseFloat(cols[cmIdx]) : NaN;
+      if (cm > 0) return cm;
+
+      const ft = ftIdx >= 0 ? parseFloat(cols[ftIdx]) : NaN;
+      const inches = inIdx >= 0 ? parseFloat(cols[inIdx]) : NaN;
+      const hasFt = ftIdx >= 0 && !isNaN(ft) && ft > 0;
+      const hasIn = inIdx >= 0 && !isNaN(inches) && inches >= 0;
+
+      if (hasFt || hasIn) {
+        const totalIn = (hasFt ? ft * 12 : 0) + (hasIn ? inches : 0);
+        if (totalIn > 0) return inToCm(totalIn);
+      }
+      return null;
+    }
+
+    function csvHasImportableMetrics(header) {
+      const hasWeight = header.includes('weight_kg') || header.includes('weight_lb');
+      const hasHeight = header.includes('height_cm') || header.includes('height_ft') || header.includes('height_in');
+      return hasWeight && hasHeight;
+    }
+
+    function generateCSV() {
+      const header = 'date,weight_kg,weight_lb,height_cm,height_ft,height_in,bmi,category,life_stage,age_at_entry,bmi_percentile,unit_system,notes,recorded_at';
+      const rows = Object.entries(entries)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([date, e]) => {
+          const { ft, inches } = heightToImperialParts(e.heightCm);
+          return [
+            date,
+            e.weightKg,
+            Math.round(kgToLb(e.weightKg) * 100) / 100,
+            e.heightCm,
+            ft,
+            inches,
+            e.bmi,
+            e.category,
+            e.lifeStage || '',
+            e.ageAtEntry || '',
+            e.bmiPercentile || '',
+            e.unitSystem || 'metric',
+            escapeCSV(e.notes || ''),
+            e.recordedAt || ''
+          ].join(',');
+        });
+      return [header, ...rows].join('\n');
+    }
+
+    function downloadCSV() {
+      if (!Object.keys(entries).length) {
+        showToast('No entries to export.');
+        return false;
+      }
+      const blob = new Blob([generateCSV()], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = CSV_FILENAME;
+      a.click();
+      URL.revokeObjectURL(url);
+      sessionStorage.setItem('vitae-exported', '1');
+      recordExportDate();
+      showToast(`Downloaded ${CSV_FILENAME}`);
+      return true;
+    }
+
+    function importCSV(text) {
+      const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) { showToast('CSV file is empty or invalid.'); return; }
+
+      const header = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+      const dateIdx = header.indexOf('date');
+      const bmiIdx = header.indexOf('bmi');
+      const catIdx = header.indexOf('category');
+      const unitIdx = header.indexOf('unit_system');
+      const notesIdx = header.indexOf('notes');
+      const recIdx = header.indexOf('recorded_at');
+
+      if (dateIdx < 0 || !csvHasImportableMetrics(header)) {
+        showToast('CSV needs date plus weight (kg or lb) and height (cm or ft+in).');
+        return;
+      }
+
+      let imported = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        const date = cols[dateIdx]?.trim();
+        const weightKg = parseCSVWeightKg(cols, header);
+        const heightCm = parseCSVHeightCm(cols, header);
+        if (!date || !weightKg || !heightCm) continue;
+
+        const bmi = bmiIdx >= 0 ? parseFloat(cols[bmiIdx]) : calcBMI(weightKg, heightCm);
+        const cat = getCategoryForUser(bmi, date);
+        const age = userProfile.birthDate ? getAgeAtDate(userProfile.birthDate, date) : null;
+        entries[date] = {
+          weightKg: Math.round(weightKg * 100) / 100,
+          heightCm: Math.round(heightCm * 100) / 100,
+          bmi: Math.round(bmi * 10) / 10,
+          category: catIdx >= 0 ? cols[catIdx] : cat.label,
+          lifeStage: cat.lifeStage?.label || '',
+          ageAtEntry: age?.label || '',
+          bmiPercentile: cat.percentile || '',
+          unitSystem: unitIdx >= 0 ? cols[unitIdx] : 'metric',
+          notes: notesIdx >= 0 ? cols[notesIdx] : '',
+          recordedAt: recIdx >= 0 ? cols[recIdx] : new Date().toISOString()
+        };
+        imported++;
+      }
+
+      if (!imported) { showToast('No valid rows found in CSV.'); return; }
+      saveEntries();
+      refreshAllViews();
+      populateFormForDate(selectedDate);
+      showToast(`Imported ${imported} entr${imported === 1 ? 'y' : 'ies'} from CSV.`);
+    }
+
+    // Tab navigation
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('#mainNav button').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tab);
+      });
+      document.querySelectorAll('.tab-panel').forEach(p => {
+        p.classList.toggle('active', p.id === `tab-${tab}`);
+      });
+      if (tab === 'graphs') setTimeout(renderChart, 50);
+      if (tab === 'bulk') renderBulkTable();
+      if (tab === 'insights') { renderInsights(); loadGoalsUI(); updateBackupStatus(); }
+    }
+
+    // Charts
+    function renderChart() {
+      const data = getSortedEntries();
+      const canvas = $('bmiChart');
+      const empty = $('chartEmpty');
+      const metrics = $('chartMetrics');
+
+      if (!data.length) {
+        canvas.style.display = 'none';
+        empty.style.display = 'block';
+        metrics.innerHTML = '';
+        return;
+      }
+
+      canvas.style.display = 'block';
+      empty.style.display = 'none';
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const w = Math.max(rect.width, 600);
+      const h = 420;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.height = h + 'px';
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      if (chartType === 'line') drawLineChart(ctx, w, h, data);
+      else if (chartType === 'bar') drawBarChart(ctx, w, h, data);
+      else drawRibbonChart(ctx, w, h, data);
+
+      renderChartMetrics(data);
+    }
+
+    function chartLayout(w, h) {
+      return { padL: 52, padR: 20, padT: 24, padB: 48, w, h,
+        plotW: w - 72, plotH: h - 72, yMin: 14, yMax: 38 };
+    }
+
+    function bmiToY(bmi, layout) {
+      return layout.padT + layout.plotH * (1 - (bmi - layout.yMin) / (layout.yMax - layout.yMin));
+    }
+
+    function idxToX(i, n, layout) {
+      return layout.padL + (n <= 1 ? layout.plotW / 2 : (i / (n - 1)) * layout.plotW);
+    }
+
+    function drawZoneBands(ctx, layout) {
+      const zones = [
+        { y0: 14, y1: 18.5, color: ZONE_COLORS.underweight },
+        { y0: 18.5, y1: 25, color: ZONE_COLORS.normal },
+        { y0: 25, y1: 30, color: ZONE_COLORS.overweight },
+        { y0: 30, y1: 38, color: ZONE_COLORS.obese }
+      ];
+      zones.forEach(z => {
+        const yTop = bmiToY(z.y1, layout);
+        const yBot = bmiToY(z.y0, layout);
+        ctx.fillStyle = z.color + '22';
+        ctx.fillRect(layout.padL, yTop, layout.plotW, yBot - yTop);
+      });
+    }
+
+    function drawAxes(ctx, layout, data) {
+      ctx.strokeStyle = 'rgba(139,163,176,0.25)';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#5a7280';
+      ctx.font = '11px Outfit, sans-serif';
+
+      [16, 18.5, 22, 25, 30, 35].forEach(v => {
+        const y = bmiToY(v, layout);
+        ctx.beginPath();
+        ctx.moveTo(layout.padL, y);
+        ctx.lineTo(layout.padL + layout.plotW, y);
+        ctx.stroke();
+        ctx.fillText(v.toString(), 8, y + 4);
+      });
+
+      const n = data.length;
+      const step = Math.max(1, Math.ceil(n / 8));
+      data.forEach((d, i) => {
+        if (i % step !== 0 && i !== n - 1) return;
+        const x = idxToX(i, n, layout);
+        const lbl = d.date.slice(5);
+        ctx.save();
+        ctx.translate(x, layout.h - 12);
+        ctx.rotate(-0.4);
+        ctx.fillText(lbl, -16, 0);
+        ctx.restore();
+      });
+    }
+
+    function drawLineChart(ctx, w, h, data) {
+      const layout = chartLayout(w, h);
+      ctx.clearRect(0, 0, w, h);
+      drawZoneBands(ctx, layout);
+      drawAxes(ctx, layout, data);
+
+      const n = data.length;
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+
+      for (let i = 1; i < n; i++) {
+        const x0 = idxToX(i - 1, n, layout), y0 = bmiToY(data[i - 1].bmi, layout);
+        const x1 = idxToX(i, n, layout), y1 = bmiToY(data[i].bmi, layout);
+        ctx.strokeStyle = getCategoryColor(data[i].bmi, data[i].date);
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+      }
+
+      data.forEach((d, i) => {
+        const x = idxToX(i, n, layout);
+        const y = bmiToY(d.bmi, layout);
+        const col = getCategoryColor(d.bmi, d.date);
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0c1419';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+    }
+
+    function drawBarChart(ctx, w, h, data) {
+      const layout = chartLayout(w, h);
+      ctx.clearRect(0, 0, w, h);
+      drawZoneBands(ctx, layout);
+      drawAxes(ctx, layout, data);
+
+      const n = data.length;
+      const barW = Math.min(36, (layout.plotW / n) * 0.65);
+      const gap = layout.plotW / n;
+
+      data.forEach((d, i) => {
+        const x = layout.padL + i * gap + (gap - barW) / 2;
+        const yTop = bmiToY(d.bmi, layout);
+        const yBase = bmiToY(layout.yMin, layout);
+        const col = getCategoryColor(d.bmi, d.date);
+
+        const grad = ctx.createLinearGradient(0, yTop, 0, yBase);
+        grad.addColorStop(0, col);
+        grad.addColorStop(1, col + '55');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, yTop, barW, yBase - yTop);
+
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, yTop, barW, yBase - yTop);
+      });
+    }
+
+    function drawRibbonChart(ctx, w, h, data) {
+      const layout = chartLayout(w, h);
+      ctx.clearRect(0, 0, w, h);
+
+      // Perspective floor grid
+      const floorY = h - 40;
+      const vanishX = w / 2;
+      const vanishY = 60;
+      ctx.strokeStyle = 'rgba(45,212,191,0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 10; i++) {
+        const t = i / 10;
+        const xL = vanishX - (w * 0.45) * (1 - t);
+        const xR = vanishX + (w * 0.45) * (1 - t);
+        const y = floorY - (floorY - vanishY) * t * 0.85;
+        ctx.beginPath();
+        ctx.moveTo(xL, y);
+        ctx.lineTo(xR, y);
+        ctx.stroke();
+      }
+
+      // Zone bands as horizontal perspective strips
+      const zones = [
+        { bmi: 18.5, color: ZONE_COLORS.underweight },
+        { bmi: 25, color: ZONE_COLORS.normal },
+        { bmi: 30, color: ZONE_COLORS.overweight },
+        { bmi: 38, color: ZONE_COLORS.obese }
+      ];
+      let prevBmi = 14;
+      zones.forEach(z => {
+        const y0 = floorY - ((prevBmi - 14) / 24) * (floorY - vanishY - 30);
+        const y1 = floorY - ((z.bmi - 14) / 24) * (floorY - vanishY - 30);
+        ctx.fillStyle = z.color + '18';
+        ctx.fillRect(40, y1, w - 80, y0 - y1);
+        prevBmi = z.bmi;
+      });
+
+      const n = data.length;
+      const depth = 28;
+      const points = data.map((d, i) => {
+        const t = n <= 1 ? 0.5 : i / (n - 1);
+        const x = 60 + t * (w - 120);
+        const y = floorY - ((d.bmi - 14) / 24) * (floorY - vanishY - 30);
+        return { x, y, bmi: d.bmi, date: d.date };
+      });
+
+      // 3D ribbon extrusion (shadow layers)
+      for (let layer = depth; layer >= 0; layer -= 4) {
+        const alpha = 0.04 + (1 - layer / depth) * 0.12;
+        ctx.globalAlpha = alpha;
+        for (let i = 1; i < points.length; i++) {
+          const p0 = points[i - 1], p1 = points[i];
+          ctx.fillStyle = getCategoryColor(p1.bmi, p1.date);
+          ctx.beginPath();
+          ctx.moveTo(p0.x, p0.y);
+          ctx.lineTo(p1.x, p1.y);
+          ctx.lineTo(p1.x + layer * 0.6, p1.y + layer * 0.35);
+          ctx.lineTo(p0.x + layer * 0.6, p0.y + layer * 0.35);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      // Ribbon top surface segments
+      for (let i = 1; i < points.length; i++) {
+        const p0 = points[i - 1], p1 = points[i];
+        const col = getCategoryColor(p1.bmi, p1.date);
+        const grad = ctx.createLinearGradient(p0.x, p0.y, p1.x, p1.y);
+        grad.addColorStop(0, getCategoryColor(p0.bmi, p0.date));
+        grad.addColorStop(1, col);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.stroke();
+
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Labels
+      ctx.fillStyle = '#8ba3b0';
+      ctx.font = '10px Outfit, sans-serif';
+      points.forEach((p, i) => {
+        if (i % Math.max(1, Math.ceil(n / 6)) === 0 || i === n - 1) {
+          ctx.fillText(p.date.slice(5), p.x - 14, floorY + 14);
+          ctx.fillText(p.bmi.toFixed(1), p.x - 10, p.y - 10);
+        }
+      });
+
+      ctx.fillStyle = '#5a7280';
+      ctx.font = '11px Outfit, sans-serif';
+      ctx.fillText('3D Ribbon — BMI trajectory through WHO zones', 52, 20);
+    }
+
+    function renderChartMetrics(data) {
+      const bmis = data.map(d => d.bmi);
+      const weights = data.map(d => d.weightKg);
+      const latest = data[data.length - 1];
+      const first = data[0];
+      const change = latest.bmi - first.bmi;
+      const avg = bmis.reduce((a, b) => a + b, 0) / bmis.length;
+
+      $('chartMetrics').innerHTML = `
+        <div class="chart-metric"><div class="chart-metric-val">${latest.bmi}</div><div class="chart-metric-lbl">Latest BMI</div></div>
+        <div class="chart-metric"><div class="chart-metric-val">${avg.toFixed(1)}</div><div class="chart-metric-lbl">Average</div></div>
+        <div class="chart-metric"><div class="chart-metric-val" style="color:${change >= 0 ? 'var(--accent-coral)' : 'var(--accent-sage)'}">${change >= 0 ? '+' : ''}${change.toFixed(1)}</div><div class="chart-metric-lbl">Total Change</div></div>
+        <div class="chart-metric"><div class="chart-metric-val">${data.length}</div><div class="chart-metric-lbl">Data Points</div></div>
+      `;
+    }
+
+    // Bulk entry
+    function buildMonthOptions(selected) {
+      return MONTH_NAMES.map((m, i) =>
+        `<option value="${i + 1}"${selected === i + 1 ? ' selected' : ''}>${MONTH_SHORT[i]}</option>`
+      ).join('');
+    }
+
+    function buildDayOptions(year, month, selected) {
+      const max = daysInMonth(year, month);
+      let html = '';
+      for (let d = 1; d <= max; d++) {
+        html += `<option value="${d}"${selected === d ? ' selected' : ''}>${d}</option>`;
+      }
+      return html;
+    }
+
+    function buildYearOptions(selected) {
+      const cur = new Date().getFullYear();
+      let html = '';
+      for (let y = cur - 10; y <= cur + 1; y++) {
+        html += `<option value="${y}"${selected === y ? ' selected' : ''}>${y}</option>`;
+      }
+      return html;
+    }
+
+    function bulkHeightCellHTML(prefill) {
+      if (unitSystem === 'metric') {
+        const h = prefill?.heightCm ?? prefill?.height ?? '';
+        return `<input type="number" class="bulk-height" step="0.1" min="30" placeholder="cm" value="${h}">`;
+      }
+      let ft = '', inches = '';
+      const cm = prefill?.heightCm ?? prefill?.height;
+      if (cm) {
+        const totalIn = cmToIn(cm);
+        ft = Math.floor(totalIn / 12);
+        inches = Math.round((totalIn % 12) * 10) / 10;
+      } else if (prefill?.heightFt != null) {
+        ft = prefill.heightFt;
+        inches = prefill.heightIn || '';
+      }
+      return `<div class="bulk-height-imperial">
+        <input type="number" class="bulk-height-ft" step="1" min="1" max="8" placeholder="ft" value="${ft}">
+        <input type="number" class="bulk-height-in" step="0.5" min="0" max="11.9" placeholder="in" value="${inches}">
+      </div>`;
+    }
+
+    function bulkWeightValue(prefill) {
+      const kg = prefill?.weightKg ?? prefill?.weight;
+      if (!kg) return '';
+      return unitSystem === 'metric' ? kg : kgToLb(kg).toFixed(1);
+    }
+
+    function getBulkRowMetric(tr) {
+      const w = parseFloat(tr.querySelector('.bulk-weight').value);
+      if (unitSystem === 'metric') {
+        const h = parseFloat(tr.querySelector('.bulk-height')?.value);
+        return { weightKg: w, heightCm: h };
+      }
+      const ft = parseFloat(tr.querySelector('.bulk-height-ft')?.value || 0);
+      const inches = parseFloat(tr.querySelector('.bulk-height-in')?.value || 0);
+      return imperialToMetric(w, ft, inches);
+    }
+
+    function createBulkRow(prefill) {
+      const now = new Date();
+      const y = prefill?.year || now.getFullYear();
+      const m = prefill?.month || now.getMonth() + 1;
+      const d = prefill?.day || now.getDate();
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="col-month"><select class="bulk-month">${buildMonthOptions(m)}</select></td>
+        <td class="col-date"><select class="bulk-day">${buildDayOptions(y, m, d)}</select></td>
+        <td class="col-year"><select class="bulk-year">${buildYearOptions(y)}</select></td>
+        <td class="col-weight"><input type="number" class="bulk-weight" step="0.1" min="1" placeholder="${unitSystem === 'metric' ? 'kg' : 'lb'}" value="${bulkWeightValue(prefill)}"></td>
+        <td class="col-height">${bulkHeightCellHTML(prefill)}</td>
+        <td class="col-bmi bulk-bmi-cell">—</td>
+        <td class="col-notes"><input type="text" class="bulk-notes" placeholder="Mood, activities…" value="${prefill?.notes || ''}"></td>
+        <td><button class="bulk-row-del" title="Remove row">×</button></td>
+      `;
+
+      const updateDays = () => {
+        const year = parseInt(tr.querySelector('.bulk-year').value);
+        const month = parseInt(tr.querySelector('.bulk-month').value);
+        const daySel = tr.querySelector('.bulk-day');
+        const curDay = parseInt(daySel.value) || 1;
+        daySel.innerHTML = buildDayOptions(year, month, Math.min(curDay, daysInMonth(year, month)));
+      };
+
+      const getRowDateStr = () => {
+        const y = parseInt(tr.querySelector('.bulk-year').value);
+        const m = parseInt(tr.querySelector('.bulk-month').value);
+        const d = parseInt(tr.querySelector('.bulk-day').value);
+        return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      };
+
+      const updateBMI = () => {
+        const { weightKg, heightCm } = getBulkRowMetric(tr);
+        const cell = tr.querySelector('.bulk-bmi-cell');
+        if (weightKg > 0 && heightCm > 0) {
+          const bmi = calcBMI(weightKg, heightCm);
+          const cat = getCategoryForUser(bmi, getRowDateStr());
+          cell.textContent = bmi.toFixed(1);
+          cell.className = `col-bmi bulk-bmi-cell bulk-bmi-${cat.key === 'underweight' ? 'under' : cat.key === 'overweight' ? 'over' : cat.key}`;
+        } else {
+          cell.textContent = '—';
+          cell.className = 'col-bmi bulk-bmi-cell';
+        }
+      };
+
+      tr.querySelector('.bulk-month').addEventListener('change', () => { updateDays(); updateBMI(); });
+      tr.querySelector('.bulk-year').addEventListener('change', updateDays);
+      tr.querySelector('.bulk-day').addEventListener('change', updateBMI);
+      tr.querySelector('.bulk-weight').addEventListener('input', updateBMI);
+      tr.querySelectorAll('.bulk-height, .bulk-height-ft, .bulk-height-in').forEach(el => {
+        el.addEventListener('input', updateBMI);
+      });
+      tr.querySelector('.bulk-row-del').addEventListener('click', () => tr.remove());
+      updateBMI();
+      return tr;
+    }
+
+    function renderBulkTable() {
+      syncUnitToggleUI();
+      const tbody = $('bulkTableBody');
+      tbody.innerHTML = '';
+      const sorted = getSortedEntries();
+      if (sorted.length) {
+        sorted.forEach(e => {
+          const [y, m, d] = e.date.split('-').map(Number);
+          tbody.appendChild(createBulkRow({
+            year: y, month: m, day: d,
+            weightKg: e.weightKg, heightCm: e.heightCm, notes: e.notes || ''
+          }));
+        });
+      } else {
+        for (let i = 0; i < 3; i++) tbody.appendChild(createBulkRow());
+      }
+    }
+
+    function saveBulkEntries() {
+      const rows = $('bulkTableBody').querySelectorAll('tr');
+      let saved = 0, skipped = 0;
+
+      rows.forEach(tr => {
+        const y = parseInt(tr.querySelector('.bulk-year').value);
+        const m = parseInt(tr.querySelector('.bulk-month').value);
+        const d = parseInt(tr.querySelector('.bulk-day').value);
+        const { weightKg, heightCm } = getBulkRowMetric(tr);
+        const notes = tr.querySelector('.bulk-notes').value.trim();
+
+        if (!weightKg || !heightCm) { skipped++; return; }
+
+        const dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const bmi = calcBMI(weightKg, heightCm);
+        const cat = getCategoryForUser(bmi, dateStr);
+        const age = userProfile.birthDate ? getAgeAtDate(userProfile.birthDate, dateStr) : null;
+        entries[dateStr] = {
+          weightKg: Math.round(weightKg * 100) / 100,
+          heightCm: Math.round(heightCm * 100) / 100,
+          bmi: Math.round(bmi * 10) / 10,
+          category: cat.label,
+          lifeStage: cat.lifeStage?.label || 'Adult',
+          ageAtEntry: age?.label || '',
+          bmiPercentile: cat.percentile || '',
+          unitSystem,
+          notes,
+          recordedAt: entries[dateStr]?.recordedAt || new Date().toISOString()
+        };
+        saved++;
+      });
+
+      if (!saved) { showToast('No complete rows to save. Enter weight and height.'); return; }
+      saveEntries();
+      refreshAllViews();
+      showToast(`Saved ${saved} entr${saved === 1 ? 'y' : 'ies'}${skipped ? ` (${skipped} incomplete skipped)` : ''}.`);
+    }
+
+    // Event listeners
+    $('calPrev').addEventListener('click', () => {
+      viewMonth--;
+      if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+      renderCalendar();
+    });
+
+    $('calNext').addEventListener('click', () => {
+      viewMonth++;
+      if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+      renderCalendar();
+    });
+
+    $('btnToday').addEventListener('click', () => {
+      const now = new Date();
+      viewYear = now.getFullYear();
+      viewMonth = now.getMonth();
+      selectDate(formatDate(now));
+      renderCalendar();
+    });
+
+    document.querySelectorAll('#unitToggle button, #globalUnitToggle button, #bulkUnitToggle button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.unit !== unitSystem) setUnitSystem(btn.dataset.unit, { refreshBulk: true });
+      });
+    });
+
+    $('btnCalculate').addEventListener('click', saveEntry);
+
+    $('btnDelete').addEventListener('click', deleteEntry);
+
+    $('btnExport').addEventListener('click', downloadCSV);
+
+    $('btnImport').addEventListener('click', () => $('csvFileInput').click());
+    $('csvFileInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => { importCSV(ev.target.result); e.target.value = ''; };
+      reader.readAsText(file);
+    });
+
+    document.querySelectorAll('#mainNav button').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.querySelectorAll('#chartTypeTabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#chartTypeTabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        chartType = btn.dataset.chart;
+        renderChart();
+      });
+    });
+
+    $('btnAddBulkRow').addEventListener('click', () => {
+      $('bulkTableBody').appendChild(createBulkRow());
+    });
+
+    $('btnSaveBulk').addEventListener('click', saveBulkEntries);
+
+    $('btnSaveGoals').addEventListener('click', saveGoals);
+    ['goalTargetWeight', 'goalTargetBmi', 'goalTargetDate'].forEach(id => {
+      $(id)?.addEventListener('input', scheduleGoalSave);
+      $(id)?.addEventListener('change', scheduleGoalSave);
+    });
+    document.querySelectorAll('#goalTypeToggle button').forEach(btn => {
+      btn.addEventListener('click', () => setGoalType(btn.dataset.goal));
+    });
+    $('weeklyBackupReminder')?.addEventListener('change', e => {
+      localStorage.setItem(BACKUP_REMINDER_KEY, e.target.checked ? 'true' : 'false');
+    });
+
+    $('btnDoctorReport').addEventListener('click', showDoctorReport);
+    $('btnPreviewReport').addEventListener('click', showDoctorReport);
+    $('btnPrintReport').addEventListener('click', printDoctorReport);
+    $('btnDownloadReport').addEventListener('click', downloadDoctorReport);
+    $('btnPrintReportModal').addEventListener('click', printDoctorReport);
+    $('btnDownloadReportModal').addEventListener('click', downloadDoctorReport);
+    $('doctorReportClose').addEventListener('click', () => $('doctorReportModal').classList.remove('open'));
+    $('doctorReportModal').addEventListener('click', e => {
+      if (e.target === $('doctorReportModal')) $('doctorReportModal').classList.remove('open');
+    });
+
+    $('backupSkip').addEventListener('click', () => {
+      localStorage.setItem(BACKUP_SNOOZE_KEY, String(Date.now() + 3 * 86400000));
+      $('backupModal').classList.remove('open');
+    });
+    $('backupExport').addEventListener('click', () => {
+      downloadCSV();
+      $('backupModal').classList.remove('open');
+    });
+    $('backupModal').addEventListener('click', e => {
+      if (e.target === $('backupModal')) $('backupModal').classList.remove('open');
+    });
+
+    $('btnInstall')?.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      $('btnInstall').style.display = 'none';
+    });
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      if ($('btnInstall')) $('btnInstall').style.display = '';
+    });
+
+    window.addEventListener('resize', () => {
+      if (activeTab === 'graphs') renderChart();
+    });
+
+    $('btnHelp').addEventListener('click', () => $('helpModal').classList.add('open'));
+    $('helpClose').addEventListener('click', () => $('helpModal').classList.remove('open'));
+    $('helpModal').addEventListener('click', e => {
+      if (e.target === $('helpModal')) $('helpModal').classList.remove('open');
+    });
+
+    $('btnExit').addEventListener('click', () => {
+      if (Object.keys(entries).length) {
+        $('exitModal').classList.add('open');
+      } else {
+        showToast('No data to export. Close this tab to exit.');
+      }
+    });
+
+    $('exitNoExport').addEventListener('click', () => {
+      $('exitModal').classList.remove('open');
+      showToast('Data remains saved locally. You may close this tab.');
+    });
+
+    $('exitWithExport').addEventListener('click', () => {
+      downloadCSV();
+      $('exitModal').classList.remove('open');
+      showToast('CSV exported. You may now close this tab.');
+    });
+
+    $('exitModal').addEventListener('click', e => {
+      if (e.target === $('exitModal')) $('exitModal').classList.remove('open');
+    });
+
+    document.querySelectorAll('#lifespanTabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#lifespanTabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderLifespan(btn.dataset.group);
+      });
+    });
+
+    window.addEventListener('beforeunload', () => {
+      flushPendingSaves();
+      saveEntries();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        flushPendingSaves();
+        saveEntries();
+      }
+    });
+
+    window.addEventListener('storage', e => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          entries = JSON.parse(e.newValue);
+          refreshAllViews();
+          populateFormForDate(selectedDate);
+        } catch { /* ignore */ }
+      }
+      if (e.key === STORAGE_SETTINGS_KEY && e.newValue) {
+        try {
+          applySettingsSnapshot(JSON.parse(e.newValue));
+          setUnitSystem(unitSystem, { skipPopulate: false, refreshBulk: true, skipSave: true });
+        } catch { /* ignore */ }
+      }
+      if (e.key === UNIT_PREF_KEY && (e.newValue === 'metric' || e.newValue === 'imperial')) {
+        if (e.newValue !== unitSystem) {
+          setUnitSystem(e.newValue, { refreshBulk: true, skipSave: true });
+        }
+      }
+    });
+
+    async function bootstrap() {
+      loadSettings();
+      drafts = loadDrafts();
+      const loaded = await loadEntriesAsync();
+      entries = loaded.data;
+      if (loaded.source !== 'none') {
+        lastSavedAt = new Date();
+        if (loaded.source === 'IndexedDB' && Object.keys(loadEntriesSync()).length === 0) {
+          saveEntries();
+          showToast('Data recovered from IndexedDB backup.');
+        }
+      }
+
+      setUnitSystem(unitSystem, { skipPopulate: true, refreshBulk: false, skipSave: true });
+
+      $('profileBirthDate')?.addEventListener('change', saveProfile);
+      $('profileSex')?.addEventListener('change', saveProfile);
+
+      $('selectedDateDisplay').textContent = formatDisplayDate(selectedDate);
+      renderCalendar();
+      renderHistory();
+      renderLifespan('male');
+      updateEntryCount();
+      updateSaveStatus();
+      updateProfileUI();
+      populateFormForDate(selectedDate);
+      bindFormAutoSave();
+      loadGoalsUI();
+      renderInsights();
+      updateBackupStatus();
+      $('weeklyBackupReminder').checked = localStorage.getItem(BACKUP_REMINDER_KEY) !== 'false';
+      if (isDesktopApp()) {
+        $('btnInstall')?.style.setProperty('display', 'none');
+      }
+      registerServiceWorker();
+      setTimeout(checkWeeklyBackup, 1500);
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>

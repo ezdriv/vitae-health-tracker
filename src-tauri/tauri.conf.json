@@ -1,0 +1,61 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Vitae Health Tracker",
+  "version": "1.0.0",
+  "identifier": "com.vitae.health-tracker",
+  "build": {
+    "beforeBuildCommand": "npm run prepare-dist",
+    "beforeDevCommand": "npm run prepare-dist",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Vitae Health Tracker",
+        "width": 1280,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 600,
+        "resizable": true,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["dmg", "deb"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "HealthcareAndFitness",
+    "shortDescription": "BMI health tracker with goals and doctor reports",
+    "longDescription": "Vitae Health Tracker monitors BMI with dated records, age-based scales, goals, CSV export, and doctor visit reports. Data is stored locally on your computer.",
+    "linux": {
+      "deb": {
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libgtk-3-0"
+        ],
+        "section": "utils",
+        "files": {}
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "dmg": {
+        "windowSize": {
+          "width": 660,
+          "height": 400
+        }
+      }
+    }
+  }
+}

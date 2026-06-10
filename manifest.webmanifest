@@ -1,0 +1,19 @@
+{
+  "name": "Vitae Health Tracker",
+  "short_name": "Vitae",
+  "description": "BMI health tracker with age-based scales, goals, and doctor reports",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1419",
+  "theme_color": "#14b8a6",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
