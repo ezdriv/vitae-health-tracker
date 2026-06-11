@@ -1,20 +1,28 @@
 #!/bin/bash
-# Complete publish after GitHub CLI has the 'workflow' scope
+# Tag v1.0.0 and trigger installer builds (workflow must exist on GitHub first)
 set -euo pipefail
 cd "$(dirname "$0")"
 
-if ! gh auth status 2>&1 | grep -q "workflow"; then
-  echo "GitHub CLI needs the 'workflow' scope to upload the Actions file."
-  echo "Run this first and complete the browser step:"
-  echo "  gh auth refresh -h github.com -s workflow -c"
+if ! gh api repos/ezdriv/vitae-health-tracker/contents/.github/workflows/release.yml --jq .name >/dev/null 2>&1; then
+  echo "The GitHub Actions workflow is not on the repo yet."
+  echo ""
+  echo "Quickest fix — run this and paste a GitHub token when asked:"
+  echo "  ./publish-with-token.sh"
+  echo ""
+  echo "Create token (check repo + workflow):"
+  echo "  https://github.com/settings/tokens/new?scopes=repo,workflow&description=Vitae-publish"
+  echo ""
+  echo "Or add the file in your browser:"
+  echo "  https://github.com/ezdriv/vitae-health-tracker/new/main/.github/workflows/release.yml"
+  echo "  (paste contents from release-workflow.yml, then Commit changes)"
   exit 1
 fi
 
-echo "Pushing release workflow..."
-git push origin main
+git fetch origin
+git pull --rebase origin main
 
 if git rev-parse v1.0.0 >/dev/null 2>&1; then
-  echo "Tag v1.0.0 already exists locally."
+  echo "Tag v1.0.0 exists locally."
 else
   git tag v1.0.0
 fi
@@ -23,7 +31,7 @@ echo "Pushing tag v1.0.0 to trigger installer builds..."
 git push origin v1.0.0
 
 echo ""
-echo "Done! Watch the build:"
+echo "Build started:"
 echo "  https://github.com/ezdriv/vitae-health-tracker/actions"
-echo "Releases (installers appear in ~10-15 min):"
+echo "Installers:"
 echo "  https://github.com/ezdriv/vitae-health-tracker/releases"
